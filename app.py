@@ -13,6 +13,7 @@ from views.ranks import render_momentum
 from views.rotation import render_rotation
 from views.settings import load_default_baskets, render_settings
 from views.today import render_today
+from views.quick_add import render_quick_add
 
 st.set_page_config(
     page_title="Theme Desk",
@@ -103,6 +104,8 @@ def main():
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+    render_quick_add()
 
     baskets = st.session_state.baskets
     z_window = st.session_state.z_window
