@@ -49,7 +49,7 @@ Streamlit Cloud's filesystem is ephemeral, so edits made in the app are lost on 
    ```toml
    [github]
    token  = "github_pat_..."
-   repo   = "your-username/Tech-Thematic-Rotation-Dashboard-Test"
+   repo   = "your-username/Theme-Desk"
    branch = "main"              # optional, defaults to main
    path   = "baskets.json"      # optional
    ```
