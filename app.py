@@ -4,7 +4,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from analytics import basket_stats, build_stock_stats, market_regime, relative_panel
+from analytics import basket_quality, basket_stats, build_stock_stats, market_regime, relative_panel
 from config import BENCHMARKS, BENCHMARK_LABELS, FETCH_PERIOD, REGIME_BENCHMARK, Z_WINDOWS
 from data import fetch_prices
 from views.baskets import render_landing_page
@@ -128,6 +128,7 @@ def main():
 
     stock_df = build_stock_stats(prices_df, baskets, z_window)
     b_stats = basket_stats(baskets, stock_df)
+    quality = basket_quality(prices_df, baskets)
 
     tab_today, tab_baskets, tab_rot, tab_mom, tab_settings = st.tabs([
         "Today", "Baskets", "Rotation Map", "Momentum Ranks", "⚙ Settings"
@@ -136,7 +137,7 @@ def main():
     with tab_today:
         render_today(stock_df, prices_df, baskets, z_window, regime)
     with tab_baskets:
-        render_landing_page(b_stats, stock_df, z_label)
+        render_landing_page(b_stats, stock_df, z_label, quality, prices_df)
     with tab_rot:
         render_rotation(b_stats, prices_df, baskets, z_window, z_label)
     with tab_mom:

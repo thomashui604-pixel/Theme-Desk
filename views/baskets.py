@@ -2,10 +2,12 @@
 
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
+from analytics import basket_correlation_matrix
 from config import INTERVALS, Z_WINDOWS
-from views.common import _color, _rgb, _sign, pct_html, z_html
+from views.common import PLOTLY_LAYOUT, _color, _rgb, _sign, pct_html, z_html
 
 
 def _mini_row_html(ticker, val, show_z=False):
@@ -19,7 +21,25 @@ def _mini_row_html(ticker, val, show_z=False):
     return f'<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px"><span style="color:#94a3b8;font-family:\'IBM Plex Mono\',monospace">{ticker}</span><span style="color:{c};font-family:\'IBM Plex Mono\',monospace;font-weight:600">{sign}{display}</span></div>'
 
 
-def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: str):
+def _breadth_bar(pct: float) -> str:
+    if pct is None:
+        return '<div style="font-size:9px;color:#475569">breadth —</div>'
+    color = "#10b981" if pct >= 60 else ("#f59e0b" if pct >= 40 else "#ef4444")
+    return f"""
+    <div style="margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+            <span style="font-size:8px;color:#475569;font-weight:600;letter-spacing:0.06em">BREADTH ▸ 50D MA</span>
+            <span style="font-size:9px;color:{color};font-family:'IBM Plex Mono',monospace;font-weight:700">{pct:.0f}%</span>
+        </div>
+        <div style="background:#0f172a;height:4px;border-radius:2px;overflow:hidden">
+            <div style="background:{color};height:100%;width:{pct:.0f}%;border-radius:2px"></div>
+        </div>
+    </div>"""
+
+
+def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: str,
+                        quality: dict | None = None, prices_df: pd.DataFrame | None = None):
+    quality = quality or {}
     _PREVIEW_PERIODS = {
         "1d":  ("ret1d",  "z1d",  "1D"),
         "5d":  ("ret5d",  "z5d",  "5D"),
@@ -161,9 +181,12 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
 
         glow_style = f"box-shadow:inset 3px 0 8px -4px {'rgba(16,185,129,0.3)' if is_up else 'rgba(239,68,68,0.3)'};"
 
+        breadth_pct = (quality.get(basket_name) or {}).get("breadth_pct")
+        breadth_html = _breadth_bar(breadth_pct)
+
         with grid_cols[i % cols_per_row]:
             st.html(f"""
-            <div style="background:{bg};border:{border};border-radius:10px;padding:14px 16px;min-height:260px;display:flex;flex-direction:column;{glow_style}">
+            <div style="background:{bg};border:{border};border-radius:10px;padding:14px 16px;min-height:300px;display:flex;flex-direction:column;{glow_style}">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
                     <div style="width:3px;height:22px;background:{color};border-radius:2px;flex-shrink:0"></div>
                     <div style="flex:1;min-width:0">
@@ -175,7 +198,7 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
                     <span style="background:rgba({rgb},0.12);color:{color};border:1px solid rgba({rgb},0.25);border-radius:3px;padding:1px 6px;font-size:8px;font-weight:700">{b_row["n"]} STOCKS</span>
                     {perf_badge}
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1e293b">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
                     <div style="background:#0b1322;border-radius:5px;padding:6px 8px;text-align:center">
                         <div style="font-size:7px;color:#475569;font-weight:600;letter-spacing:0.06em;margin-bottom:2px">{m1_l}</div>
                         <div>{m1_v}</div>
@@ -188,6 +211,9 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
                         <div style="font-size:7px;color:#475569;font-weight:600;letter-spacing:0.06em;margin-bottom:2px">{m3_l}</div>
                         <div>{m3_v}</div>
                     </div>
+                </div>
+                <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1e293b">
+                    {breadth_html}
                 </div>
                 <div style="margin-bottom:6px">
                     <div style="font-size:8px;font-weight:700;color:#10b981;letter-spacing:0.08em;margin-bottom:3px">▲ TOP 3 ({pp_label})</div>
@@ -214,10 +240,17 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
         if exp_match:
             basket_name, cfg, b_row, members = exp_match[0]
             st.markdown("<div style='height:12px'/>", unsafe_allow_html=True)
-            render_expanded_detail(basket_name, cfg, b_row, members)
+            render_expanded_detail(
+                basket_name, cfg, b_row, members,
+                quality.get(basket_name) or {},
+                prices_df,
+            )
 
 
-def render_expanded_detail(basket_name, cfg, b_row, members_df):
+def render_expanded_detail(basket_name, cfg, b_row, members_df,
+                           q: dict | None = None,
+                           prices_df: pd.DataFrame | None = None):
+    q = q or {}
     color = cfg["color"]
     rgb = _rgb(color)
     show_z = st.session_state.display_mode == "zscore"
@@ -288,5 +321,74 @@ def render_expanded_detail(basket_name, cfg, b_row, members_df):
         </table>
     </div>
     """)
+
+    st.markdown("<div style='height:16px'/>", unsafe_allow_html=True)
+
+    _render_quality_section(cfg, q, prices_df, rgb)
+
+
+def _render_quality_section(cfg, q, prices_df, rgb):
+    breadth = q.get("breadth_pct")
+    dispersion = q.get("dispersion")
+    mean_corr = q.get("mean_corr")
+
+    if prices_df is None or not cfg.get("tickers"):
+        return
+
+    st.markdown('<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket quality</div>', unsafe_allow_html=True)
+
+    m_col, h_col = st.columns([1, 2])
+    with m_col:
+        b_txt = f"{breadth:.0f}%" if breadth is not None else "—"
+        d_txt = f"{dispersion:.2f}%" if dispersion is not None else "—"
+        c_txt = f"{mean_corr:.2f}" if mean_corr is not None else "—"
+        st.html(f"""
+        <div style="background:#080f1a;border:1px solid rgba({rgb},0.25);border-radius:8px;padding:14px 16px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div>
+                    <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">BREADTH · % &gt; 50D MA</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{b_txt}</div>
+                </div>
+                <div>
+                    <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">DISPERSION · σ OF 20D RETURNS</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{d_txt}</div>
+                </div>
+                <div>
+                    <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">MEAN PAIRWISE CORR · 60D</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{c_txt}</div>
+                </div>
+            </div>
+        </div>
+        """)
+
+    with h_col:
+        corr = basket_correlation_matrix(prices_df, cfg["tickers"], window=60)
+        if corr.empty:
+            st.html(f'<div style="background:#080f1a;border:1px solid rgba({rgb},0.25);border-radius:8px;padding:14px 16px;color:#475569;font-size:11px">Not enough constituents for a correlation matrix.</div>')
+            return
+        fig = go.Figure(data=go.Heatmap(
+            z=corr.values,
+            x=corr.columns, y=corr.index,
+            zmin=-1, zmax=1,
+            colorscale=[
+                [0.0, "#ef4444"],
+                [0.5, "#0b1322"],
+                [1.0, "#10b981"],
+            ],
+            colorbar=dict(thickness=8, len=0.7, tickfont=dict(size=9, color="#94a3b8")),
+            hovertemplate="%{y} ↔ %{x}: %{z:.2f}<extra></extra>",
+        ))
+        height = max(220, 22 * len(corr) + 60)
+        fig.update_layout(
+            **{**PLOTLY_LAYOUT,
+               "height": height,
+               "margin": dict(l=40, r=20, t=20, b=40),
+               "showlegend": False,
+               "xaxis": dict(tickfont=dict(size=9, color="#94a3b8"),
+                             showgrid=False, zeroline=False),
+               "yaxis": dict(tickfont=dict(size=9, color="#94a3b8"),
+                             showgrid=False, zeroline=False, autorange="reversed")},
+        )
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown("<div style='height:16px'/>", unsafe_allow_html=True)

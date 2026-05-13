@@ -211,6 +211,68 @@ def leadership_flips(basket_z: pd.DataFrame, lookback_days: int = 5,
     return flips
 
 
+def basket_quality(prices_df: pd.DataFrame, baskets: dict,
+                   ma_window: int = 50, corr_window: int = 60,
+                   disp_lookback: int = 20) -> dict:
+    """Breadth, dispersion, and mean intra-basket correlation per basket."""
+    result = {}
+    for name, cfg in baskets.items():
+        members = [t for t in cfg["tickers"] if t in prices_df.columns]
+        breadth = None
+        dispersion = None
+        mean_corr = None
+
+        if members:
+            above = total = 0
+            for t in members:
+                s = prices_df[t].dropna()
+                if len(s) < ma_window + 1:
+                    continue
+                ma = s.rolling(ma_window).mean().iloc[-1]
+                if pd.isna(ma):
+                    continue
+                above += int(s.iloc[-1] > ma)
+                total += 1
+            if total:
+                breadth = above / total * 100
+
+        if len(members) >= 2:
+            returns = []
+            for t in members:
+                s = prices_df[t].dropna()
+                if len(s) >= disp_lookback + 1:
+                    returns.append(ret_pct(s, disp_lookback))
+            if len(returns) >= 2:
+                dispersion = float(np.std(returns, ddof=1))
+
+            rets = prices_df[members].pct_change().dropna().tail(corr_window)
+            if not rets.empty and len(rets.columns) >= 2:
+                corr = rets.corr()
+                mask = np.triu(np.ones_like(corr, dtype=bool), k=1)
+                vals = corr.values[mask]
+                vals = vals[~np.isnan(vals)]
+                if len(vals):
+                    mean_corr = float(vals.mean())
+
+        result[name] = {
+            "breadth_pct": breadth,
+            "dispersion": dispersion,
+            "mean_corr": mean_corr,
+        }
+    return result
+
+
+def basket_correlation_matrix(prices_df: pd.DataFrame, tickers: list,
+                              window: int = 60) -> pd.DataFrame:
+    members = [t for t in tickers if t in prices_df.columns]
+    if len(members) < 2:
+        return pd.DataFrame()
+    rets = prices_df[members].pct_change().dropna().tail(window)
+    if rets.empty:
+        return pd.DataFrame()
+    return rets.corr()
+
+
 def ytd_return(prices: pd.Series) -> float:
     if prices.empty:
         return 0.0
