@@ -372,10 +372,11 @@ def _ticker_dialog(ticker: str, basket_name: str, prices_df: pd.DataFrame):
     )
     st.plotly_chart(price_fig, use_container_width=True, config={"displayModeBar": False})
 
-    # Z-scores over time (5d + 20d)
+    # Z-scores over time (5d + 20d) using the active z-window from session.
     full = prices_df[ticker].dropna()
-    z5 = zscore_series(full, 5, 252).dropna().tail(252)
-    z20 = zscore_series(full, 20, 252).dropna().tail(252)
+    z_window = st.session_state.get("z_window", 252)
+    z5 = zscore_series(full, 5, z_window).dropna().tail(252)
+    z20 = zscore_series(full, 20, z_window).dropna().tail(252)
     z_fig = go.Figure()
     z_fig.add_trace(go.Scatter(x=z5.index, y=z5.values, mode="lines",
                                 name="5d z", line=dict(color="#06b6d4", width=1.2)))
