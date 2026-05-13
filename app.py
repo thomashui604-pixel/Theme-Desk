@@ -6,7 +6,7 @@ import streamlit as st
 
 from analytics import basket_quality, basket_stats, build_stock_stats, market_regime, relative_panel
 from config import BENCHMARKS, BENCHMARK_LABELS, FETCH_PERIOD, REGIME_BENCHMARK, Z_WINDOWS
-from data import fetch_prices
+from data import fetch_prices, missing_tickers
 from views.baskets import render_landing_page
 from views.common import inject_css
 from views.ranks import render_momentum
@@ -23,6 +23,40 @@ st.set_page_config(
 inject_css()
 
 
+# Keys read from / written to ?...= query params on every run.
+_PERSISTED_PREFS = {
+    "z_window":       ("zw",  int,  252),
+    "display_mode":   ("m",   str,  "returns"),
+    "preview_period": ("p",   str,  "5d"),
+    "benchmark_mode": ("b",   str,  "absolute"),
+}
+
+
+def _read_prefs_from_url() -> dict:
+    qp = st.query_params
+    out = {}
+    for key, (short, cast, default) in _PERSISTED_PREFS.items():
+        raw = qp.get(short)
+        if raw is None:
+            out[key] = default
+            continue
+        try:
+            out[key] = cast(raw)
+        except (TypeError, ValueError):
+            out[key] = default
+    return out
+
+
+def _write_prefs_to_url() -> None:
+    for key, (short, _cast, default) in _PERSISTED_PREFS.items():
+        val = st.session_state.get(key, default)
+        if val == default:
+            if short in st.query_params:
+                del st.query_params[short]
+        else:
+            st.query_params[short] = str(val)
+
+
 def _init_session_state() -> None:
     if "baskets" not in st.session_state:
         st.session_state.baskets = load_default_baskets()
@@ -30,16 +64,14 @@ def _init_session_state() -> None:
         st.session_state.editing_basket = None
     if "selected_basket" not in st.session_state:
         st.session_state.selected_basket = list(st.session_state.baskets.keys())[0]
-    if "z_window" not in st.session_state:
-        st.session_state.z_window = 252
     if "expanded_basket" not in st.session_state:
         st.session_state.expanded_basket = None
-    if "display_mode" not in st.session_state:
-        st.session_state.display_mode = "returns"
-    if "preview_period" not in st.session_state:
-        st.session_state.preview_period = "5d"
-    if "benchmark_mode" not in st.session_state:
-        st.session_state.benchmark_mode = "absolute"
+
+    prefs = _read_prefs_from_url()
+    for key, value in prefs.items():
+        st.session_state.setdefault(key, value)
+    if "compare_baskets" not in st.session_state:
+        st.session_state.compare_baskets = []
 
 
 def _render_regime_badge(regime: dict) -> str:
@@ -86,6 +118,13 @@ def main():
     if full_panel.empty:
         st.error("Could not fetch price data. Check your internet connection.")
         return
+
+    missing = missing_tickers(all_tickers, full_panel)
+    if missing:
+        st.warning(
+            "Missing data for: " + ", ".join(missing) +
+            ". Check the ticker spelling in Settings."
+        )
 
     spy_series = full_panel[REGIME_BENCHMARK] if REGIME_BENCHMARK in full_panel.columns else None
     prices_df = full_panel[[c for c in all_tickers if c in full_panel.columns]]
@@ -144,6 +183,8 @@ def main():
         render_momentum(stock_df, b_stats, z_label)
     with tab_settings:
         render_settings()
+
+    _write_prefs_to_url()
 
 
 if __name__ == "__main__":

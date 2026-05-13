@@ -324,7 +324,84 @@ def render_expanded_detail(basket_name, cfg, b_row, members_df,
 
     st.markdown("<div style='height:16px'/>", unsafe_allow_html=True)
 
+    _render_ticker_drilldown(basket_name, cfg, members_df, prices_df, rgb)
     _render_quality_section(cfg, q, prices_df, rgb)
+
+
+@st.dialog("Ticker detail", width="large")
+def _ticker_dialog(ticker: str, basket_name: str, prices_df: pd.DataFrame):
+    from analytics import zscore_series  # local to avoid circular
+
+    if ticker not in prices_df.columns:
+        st.warning(f"No price data for {ticker}.")
+        return
+    series = prices_df[ticker].dropna().tail(252)
+    if series.empty:
+        st.warning(f"No price data for {ticker}.")
+        return
+
+    st.markdown(
+        f'<div style="font-size:11px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">'
+        f'<span style="color:#e2e8f0;font-weight:700;font-size:14px;font-family:\'IBM Plex Mono\',monospace">{ticker}</span>'
+        f' &nbsp;·&nbsp; in {basket_name} &nbsp;·&nbsp; last 12 months</div>',
+        unsafe_allow_html=True,
+    )
+
+    # Price (rebased to 100)
+    rebased = series / series.iloc[0] * 100
+    price_fig = go.Figure()
+    price_fig.add_trace(go.Scatter(
+        x=rebased.index, y=rebased.values, mode="lines",
+        line=dict(color="#f59e0b", width=1.6),
+        hovertemplate="%{x|%b %d, %Y}<br>%{y:.1f} (rebased)<extra></extra>",
+    ))
+    price_fig.update_layout(
+        **{**PLOTLY_LAYOUT,
+           "height": 220,
+           "margin": dict(l=40, r=20, t=10, b=30),
+           "showlegend": False,
+           "yaxis": {**PLOTLY_LAYOUT["yaxis"],
+                     "title": dict(text="Price (rebased=100)", font=dict(color="#475569", size=9))}},
+    )
+    st.plotly_chart(price_fig, use_container_width=True, config={"displayModeBar": False})
+
+    # Z-scores over time (5d + 20d)
+    full = prices_df[ticker].dropna()
+    z5 = zscore_series(full, 5, 252).dropna().tail(252)
+    z20 = zscore_series(full, 20, 252).dropna().tail(252)
+    z_fig = go.Figure()
+    z_fig.add_trace(go.Scatter(x=z5.index, y=z5.values, mode="lines",
+                                name="5d z", line=dict(color="#06b6d4", width=1.2)))
+    z_fig.add_trace(go.Scatter(x=z20.index, y=z20.values, mode="lines",
+                                name="20d z", line=dict(color="#a855f7", width=1.2)))
+    z_fig.add_hline(y=0, line=dict(color="#334155", dash="dot", width=1))
+    z_fig.update_layout(
+        **{**PLOTLY_LAYOUT,
+           "height": 200,
+           "margin": dict(l=40, r=20, t=10, b=30),
+           "yaxis": {**PLOTLY_LAYOUT["yaxis"],
+                     "title": dict(text="Z-score (σ)", font=dict(color="#475569", size=9))}},
+    )
+    st.plotly_chart(z_fig, use_container_width=True, config={"displayModeBar": False})
+
+
+def _render_ticker_drilldown(basket_name, cfg, members_df, prices_df, rgb):
+    if prices_df is None or members_df.empty:
+        return
+    members = members_df["ticker"].tolist()
+    sel_key = f"drilldown_{basket_name}"
+    col_sel, col_btn = st.columns([3, 1])
+    with col_sel:
+        choice = st.selectbox(
+            "Inspect ticker", ["— select —"] + members,
+            key=sel_key, label_visibility="collapsed",
+        )
+    with col_btn:
+        clicked = st.button("Open detail", key=f"drilldown_btn_{basket_name}",
+                            use_container_width=True,
+                            disabled=(choice == "— select —"))
+    if clicked and choice != "— select —":
+        _ticker_dialog(choice, basket_name, prices_df)
 
 
 def _render_quality_section(cfg, q, prices_df, rgb):

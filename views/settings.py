@@ -163,7 +163,6 @@ def render_settings():
         cross_dupes = {t: bs for t, bs in ticker_to_baskets.items() if len(bs) > 1}
 
         if cross_dupes:
-            has_issues = True
             for t, bs in sorted(cross_dupes.items()):
                 tags = ""
                 for b in bs:
@@ -171,9 +170,9 @@ def render_settings():
                     tags += f'<span style="background:rgba({_rgb(color)},0.13);color:{color};border:1px solid rgba({_rgb(color)},0.27);border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">{b}</span> '
                 diag_html += f"""
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-                    <span style="color:#f59e0b;font-size:12px;font-weight:900">⚠</span>
+                    <span style="color:#64748b;font-size:11px">·</span>
                     <span style="font-size:11px;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-weight:700">{t}</span>
-                    <span style="font-size:10px;color:#94a3b8">appears in {len(bs)} baskets:</span>
+                    <span style="font-size:10px;color:#64748b">in {len(bs)} baskets:</span>
                     {tags}
                 </div>"""
 

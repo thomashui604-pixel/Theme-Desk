@@ -65,6 +65,20 @@ hr { border-color: #1e293b !important; }
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 header { visibility: hidden; }
+
+/* Mobile / narrow viewport — collapse multi-column layouts to single column */
+@media (max-width: 800px) {
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        margin-bottom: 8px;
+    }
+    .block-container { padding: 0.75rem !important; }
+    .stTabs [data-baseweb="tab"] { padding: 10px 12px; font-size: 11px; }
+}
 </style>
 """
 
