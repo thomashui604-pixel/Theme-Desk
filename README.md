@@ -33,29 +33,36 @@ That's it. Accessible from any browser, no Python or Node required.
 
 ## Saving your basket config
 
-Basket changes (add/edit/delete) persist **for your current session only** on Streamlit Cloud (the server is stateless).
+Streamlit Cloud's filesystem is ephemeral, so edits made in the app are lost on every redeploy or restart. To make ticker edits persist, configure the app to commit `baskets.json` back to this repo automatically.
 
-To save your baskets permanently:
+### One-time setup
 
-1. Click **"⬇ Export baskets.json"** in the sidebar
-2. Commit the downloaded `baskets.json` to your repo
-3. In `app.py`, change the `DEFAULT_BASKETS` loader to read from the file:
+1. **Create a fine-grained Personal Access Token** at
+   [github.com/settings/tokens?type=beta](https://github.com/settings/tokens?type=beta):
+   - **Resource owner**: your account
+   - **Repository access**: only this repo
+   - **Permissions** → Repository → **Contents: Read and write**
+   - Copy the token (`github_pat_…`)
 
-```python
-import json, os
+2. **Add it to Streamlit Cloud secrets**:
+   Streamlit app → Settings → Secrets → paste:
+   ```toml
+   [github]
+   token  = "github_pat_..."
+   repo   = "your-username/Tech-Thematic-Rotation-Dashboard-Test"
+   branch = "main"              # optional, defaults to main
+   path   = "baskets.json"      # optional
+   ```
 
-def load_default_baskets():
-    if os.path.exists("baskets.json"):
-        with open("baskets.json") as f:
-            return json.load(f)
-    return DEFAULT_BASKETS
+### How it works
 
-# Then in session state init:
-if "baskets" not in st.session_state:
-    st.session_state.baskets = load_default_baskets()
-```
+Once configured, the **Quick-Add row at the top of every page** lets you paste tickers + pick a basket + hit `＋ Add`. The app:
 
-Commit that change and your baskets will be pre-loaded on every new session.
+1. Updates the basket in-session immediately
+2. Commits the updated `baskets.json` to your repo via the GitHub API
+3. Streamlit Cloud detects the commit and redeploys (~30s)
+
+Without the token, quick-add still works but only for the current session.
 
 ---
 
