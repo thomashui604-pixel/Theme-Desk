@@ -129,6 +129,150 @@ def rotation_trails(prices_df: pd.DataFrame, baskets: dict,
     return trails
 
 
+def momentum_history(prices_df: pd.DataFrame, baskets: dict,
+                     z_window: int, lookback: int = 20) -> dict:
+    """Per-ticker and per-basket z-score time series for the given lookback.
+
+    Returns:
+      {
+        "ticker_z": DataFrame (date × ticker) of z-score over `lookback`,
+        "basket_z": DataFrame (date × basket) of mean z across constituents.
+      }
+    """
+    ticker_z = pd.DataFrame({
+        t: zscore_series(prices_df[t].dropna(), lookback, z_window)
+        for t in prices_df.columns
+    })
+    basket_z = pd.DataFrame()
+    for name, cfg in baskets.items():
+        members = [t for t in cfg["tickers"] if t in ticker_z.columns]
+        if not members:
+            continue
+        basket_z[name] = ticker_z[members].mean(axis=1)
+    return {"ticker_z": ticker_z, "basket_z": basket_z}
+
+
+def zscore_crossings(ticker_z: pd.DataFrame, baskets: dict) -> list:
+    """Tickers whose z-score crossed zero between the last two trading days."""
+    if ticker_z.empty or len(ticker_z) < 2:
+        return []
+    prev = ticker_z.iloc[-2]
+    cur = ticker_z.iloc[-1]
+
+    primary = {}
+    for name, cfg in baskets.items():
+        for t in cfg["tickers"]:
+            primary.setdefault(t, name)
+
+    crossings = []
+    for ticker in ticker_z.columns:
+        p, c = prev.get(ticker), cur.get(ticker)
+        if pd.isna(p) or pd.isna(c):
+            continue
+        if p == 0 or c == 0:
+            continue
+        if (p < 0) != (c < 0):
+            crossings.append({
+                "ticker": ticker,
+                "basket": primary.get(ticker, "Other"),
+                "prev_z": float(p),
+                "cur_z": float(c),
+                "direction": "up" if c > 0 else "down",
+            })
+    # Strongest moves first.
+    crossings.sort(key=lambda r: abs(r["cur_z"] - r["prev_z"]), reverse=True)
+    return crossings
+
+
+def leadership_flips(basket_z: pd.DataFrame, lookback_days: int = 5,
+                     min_change: int = 3) -> list:
+    """Baskets whose mean-z rank moved by at least `min_change` vs N days ago."""
+    if basket_z.empty or len(basket_z) <= lookback_days:
+        return []
+    cur = basket_z.iloc[-1].dropna()
+    prev = basket_z.iloc[-1 - lookback_days].dropna()
+    common = cur.index.intersection(prev.index)
+    if len(common) < 2:
+        return []
+    # Rank 1 = highest z.
+    cur_rank = cur[common].rank(ascending=False, method="min").astype(int)
+    prev_rank = prev[common].rank(ascending=False, method="min").astype(int)
+    flips = []
+    for name in common:
+        delta = int(prev_rank[name]) - int(cur_rank[name])  # positive = moved up
+        if abs(delta) >= min_change:
+            flips.append({
+                "basket": name,
+                "prev_rank": int(prev_rank[name]),
+                "cur_rank": int(cur_rank[name]),
+                "delta": delta,
+            })
+    flips.sort(key=lambda r: abs(r["delta"]), reverse=True)
+    return flips
+
+
+def basket_quality(prices_df: pd.DataFrame, baskets: dict,
+                   ma_window: int = 50, corr_window: int = 60,
+                   disp_lookback: int = 20) -> dict:
+    """Breadth, dispersion, and mean intra-basket correlation per basket."""
+    result = {}
+    for name, cfg in baskets.items():
+        members = [t for t in cfg["tickers"] if t in prices_df.columns]
+        breadth = None
+        dispersion = None
+        mean_corr = None
+
+        if members:
+            above = total = 0
+            for t in members:
+                s = prices_df[t].dropna()
+                if len(s) < ma_window + 1:
+                    continue
+                ma = s.rolling(ma_window).mean().iloc[-1]
+                if pd.isna(ma):
+                    continue
+                above += int(s.iloc[-1] > ma)
+                total += 1
+            if total:
+                breadth = above / total * 100
+
+        if len(members) >= 2:
+            returns = []
+            for t in members:
+                s = prices_df[t].dropna()
+                if len(s) >= disp_lookback + 1:
+                    returns.append(ret_pct(s, disp_lookback))
+            if len(returns) >= 2:
+                dispersion = float(np.std(returns, ddof=1))
+
+            rets = prices_df[members].pct_change().dropna().tail(corr_window)
+            if not rets.empty and len(rets.columns) >= 2:
+                corr = rets.corr()
+                mask = np.triu(np.ones_like(corr, dtype=bool), k=1)
+                vals = corr.values[mask]
+                vals = vals[~np.isnan(vals)]
+                if len(vals):
+                    mean_corr = float(vals.mean())
+
+        result[name] = {
+            "breadth_pct": breadth,
+            "dispersion": dispersion,
+            "mean_corr": mean_corr,
+        }
+    return result
+
+
+def basket_correlation_matrix(prices_df: pd.DataFrame, tickers: list,
+                              window: int = 60) -> pd.DataFrame:
+    members = [t for t in tickers if t in prices_df.columns]
+    if len(members) < 2:
+        return pd.DataFrame()
+    rets = prices_df[members].pct_change().dropna().tail(window)
+    if rets.empty:
+        return pd.DataFrame()
+    return rets.corr()
+
+
 def ytd_return(prices: pd.Series) -> float:
     if prices.empty:
         return 0.0

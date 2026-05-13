@@ -4,7 +4,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from analytics import basket_stats, build_stock_stats, market_regime, relative_panel
+from analytics import basket_quality, basket_stats, build_stock_stats, market_regime, relative_panel
 from config import BENCHMARKS, BENCHMARK_LABELS, FETCH_PERIOD, REGIME_BENCHMARK, Z_WINDOWS
 from data import fetch_prices
 from views.baskets import render_landing_page
@@ -12,6 +12,7 @@ from views.common import inject_css
 from views.ranks import render_momentum
 from views.rotation import render_rotation
 from views.settings import load_default_baskets, render_settings
+from views.today import render_today
 
 st.set_page_config(
     page_title="Theme Desk",
@@ -41,8 +42,7 @@ def _init_session_state() -> None:
         st.session_state.benchmark_mode = "absolute"
 
 
-def _render_regime_badge(spy: "pd.Series | None") -> str:
-    regime = market_regime(spy)
+def _render_regime_badge(regime: dict) -> str:
     return f"""
     <div style="display:inline-flex;align-items:center;gap:8px;background:#080f1a;border:1px solid rgba({_rgb_from_hex(regime['color'])},0.35);border-radius:6px;padding:6px 12px">
         <span style="width:6px;height:6px;border-radius:50%;background:{regime['color']};box-shadow:0 0 6px {regime['color']}"></span>
@@ -105,9 +105,10 @@ def main():
         """, unsafe_allow_html=True)
 
     # Regime + benchmark toggle row
+    regime = market_regime(spy_series)
     col_regime, col_bench = st.columns([4, 2])
     with col_regime:
-        st.markdown(_render_regime_badge(spy_series), unsafe_allow_html=True)
+        st.markdown(_render_regime_badge(regime), unsafe_allow_html=True)
     with col_bench:
         bench_keys = list(BENCHMARKS.keys())
         bench_idx = bench_keys.index(bench_mode) if bench_mode in bench_keys else 0
@@ -127,13 +128,16 @@ def main():
 
     stock_df = build_stock_stats(prices_df, baskets, z_window)
     b_stats = basket_stats(baskets, stock_df)
+    quality = basket_quality(prices_df, baskets)
 
-    tab_baskets, tab_rot, tab_mom, tab_settings = st.tabs([
-        "Baskets", "Rotation Map", "Momentum Ranks", "⚙ Settings"
+    tab_today, tab_baskets, tab_rot, tab_mom, tab_settings = st.tabs([
+        "Today", "Baskets", "Rotation Map", "Momentum Ranks", "⚙ Settings"
     ])
 
+    with tab_today:
+        render_today(stock_df, prices_df, baskets, z_window, regime)
     with tab_baskets:
-        render_landing_page(b_stats, stock_df, z_label)
+        render_landing_page(b_stats, stock_df, z_label, quality, prices_df)
     with tab_rot:
         render_rotation(b_stats, prices_df, baskets, z_window, z_label)
     with tab_mom:
