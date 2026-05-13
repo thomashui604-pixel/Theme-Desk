@@ -31,40 +31,22 @@ def save_baskets() -> None:
 
 
 def persist(commit_message: str, success_label: str = "Saved") -> None:
-    """Write locally, then commit to GitHub if configured. Stash a flash
-    message in session_state so the next render (after st.rerun) displays it.
+    """Write locally, then commit to GitHub if configured. Uses st.toast so
+    the notification survives the st.rerun() (and any auto-redeploy) that
+    each settings handler triggers.
     """
     save_baskets()
     if is_configured():
         ok, detail = commit_baskets(st.session_state.baskets, message=commit_message)
         if ok:
-            st.session_state._settings_flash = (
-                "success",
-                f"{success_label} · committed to repo (Streamlit Cloud will redeploy in ~30s)",
-            )
+            st.toast(f"{success_label} · committed to repo (redeploy ~30s)", icon="✅")
         else:
-            st.session_state._settings_flash = (
-                "warning",
-                f"{success_label} locally · GitHub commit failed: `{detail}`",
-            )
+            st.toast(f"{success_label} locally · commit failed: {detail}", icon="⚠️")
     else:
-        st.session_state._settings_flash = (
-            "info",
-            f"{success_label} for this session only. "
-            "Configure `[github]` in Streamlit secrets to persist (see README).",
-        )
-
-
-def _consume_flash() -> None:
-    flash = st.session_state.pop("_settings_flash", None)
-    if not flash:
-        return
-    kind, msg = flash
-    getattr(st, kind)(msg)
+        st.toast(f"{success_label} (session only — add [github] secret)", icon="ℹ️")
 
 
 def render_settings():
-    _consume_flash()
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
