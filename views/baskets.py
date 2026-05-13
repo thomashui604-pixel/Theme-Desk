@@ -125,9 +125,8 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
 
     n_cards = len(card_data)
     cols_per_row = min(n_cards, 5)
-    grid_cols = st.columns(cols_per_row)
 
-    for i, (basket_name, cfg, b_row, members) in enumerate(card_data):
+    def _render_card(basket_name, cfg, b_row, members, slot):
         color = cfg["color"]
         rgb = _rgb(color)
         is_exp = expanded == basket_name
@@ -184,7 +183,7 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
         breadth_pct = (quality.get(basket_name) or {}).get("breadth_pct")
         breadth_html = _breadth_bar(breadth_pct)
 
-        with grid_cols[i % cols_per_row]:
+        with slot:
             st.html(f"""
             <div style="background:{bg};border:{border};border-radius:10px;padding:14px 16px;min-height:300px;display:flex;flex-direction:column;{glow_style}">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
@@ -235,16 +234,24 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
                     st.session_state.selected_basket = basket_name
                 st.rerun()
 
-    if expanded:
-        exp_match = [(bn, c, br, m) for bn, c, br, m in card_data if bn == expanded]
-        if exp_match:
-            basket_name, cfg, b_row, members = exp_match[0]
-            st.markdown("<div style='height:12px'/>", unsafe_allow_html=True)
-            render_expanded_detail(
-                basket_name, cfg, b_row, members,
-                quality.get(basket_name) or {},
-                prices_df,
-            )
+    # Render in row chunks so the expanded detail drops in directly under
+    # the row containing the pressed button, not at the bottom of the page.
+    for row_start in range(0, n_cards, cols_per_row):
+        row = card_data[row_start:row_start + cols_per_row]
+        row_cols = st.columns(cols_per_row)
+        for slot, (basket_name, cfg, b_row, members) in zip(row_cols, row):
+            _render_card(basket_name, cfg, b_row, members, slot)
+
+        if expanded:
+            in_row = next(((bn, c, br, m) for bn, c, br, m in row if bn == expanded), None)
+            if in_row:
+                basket_name, cfg, b_row, members = in_row
+                st.markdown("<div style='height:12px'/>", unsafe_allow_html=True)
+                render_expanded_detail(
+                    basket_name, cfg, b_row, members,
+                    quality.get(basket_name) or {},
+                    prices_df,
+                )
 
 
 def render_expanded_detail(basket_name, cfg, b_row, members_df,
