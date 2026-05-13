@@ -6,6 +6,7 @@ from pathlib import Path
 import streamlit as st
 
 from config import DEFAULT_BASKETS, PALETTE
+from gh_commit import commit_baskets, is_configured
 from views.common import _rgb
 
 BASKETS_PATH = Path(__file__).resolve().parent.parent / "baskets.json"
@@ -29,7 +30,41 @@ def save_baskets() -> None:
         pass
 
 
+def persist(commit_message: str, success_label: str = "Saved") -> None:
+    """Write locally, then commit to GitHub if configured. Stash a flash
+    message in session_state so the next render (after st.rerun) displays it.
+    """
+    save_baskets()
+    if is_configured():
+        ok, detail = commit_baskets(st.session_state.baskets, message=commit_message)
+        if ok:
+            st.session_state._settings_flash = (
+                "success",
+                f"{success_label} · committed to repo (Streamlit Cloud will redeploy in ~30s)",
+            )
+        else:
+            st.session_state._settings_flash = (
+                "warning",
+                f"{success_label} locally · GitHub commit failed: `{detail}`",
+            )
+    else:
+        st.session_state._settings_flash = (
+            "info",
+            f"{success_label} for this session only. "
+            "Configure `[github]` in Streamlit secrets to persist (see README).",
+        )
+
+
+def _consume_flash() -> None:
+    flash = st.session_state.pop("_settings_flash", None)
+    if not flash:
+        return
+    kind, msg = flash
+    getattr(st, kind)(msg)
+
+
 def render_settings():
+    _consume_flash()
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
@@ -98,7 +133,8 @@ def render_settings():
                         if is_new:
                             st.session_state.selected_basket = name_clean
                         st.session_state.editing_basket = None
-                        save_baskets()
+                        verb = "Created" if is_new else "Updated"
+                        persist(f"{verb} basket {name_clean}", f"{verb} {name_clean}")
                         st.rerun()
 
                 if cancelled:
@@ -107,11 +143,12 @@ def render_settings():
 
             if not is_new:
                 if st.button(f"🗑 Delete '{editing}'", key="delete_basket", use_container_width=True):
+                    deleted = editing
                     del st.session_state.baskets[editing]
                     remaining = list(st.session_state.baskets.keys())
                     st.session_state.selected_basket = remaining[0] if remaining else None
                     st.session_state.editing_basket = None
-                    save_baskets()
+                    persist(f"Delete basket {deleted}", f"Deleted {deleted}")
                     st.rerun()
 
     with col_right:
@@ -126,8 +163,7 @@ def render_settings():
                 imported = json.load(uploaded)
                 st.session_state.baskets = imported
                 st.session_state.selected_basket = list(imported.keys())[0]
-                save_baskets()
-                st.success("Imported!")
+                persist("Import baskets.json from upload", "Imported")
                 st.rerun()
             except Exception as e:
                 st.error(f"Invalid file: {e}")
