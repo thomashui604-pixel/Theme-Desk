@@ -129,6 +129,88 @@ def rotation_trails(prices_df: pd.DataFrame, baskets: dict,
     return trails
 
 
+def momentum_history(prices_df: pd.DataFrame, baskets: dict,
+                     z_window: int, lookback: int = 20) -> dict:
+    """Per-ticker and per-basket z-score time series for the given lookback.
+
+    Returns:
+      {
+        "ticker_z": DataFrame (date × ticker) of z-score over `lookback`,
+        "basket_z": DataFrame (date × basket) of mean z across constituents.
+      }
+    """
+    ticker_z = pd.DataFrame({
+        t: zscore_series(prices_df[t].dropna(), lookback, z_window)
+        for t in prices_df.columns
+    })
+    basket_z = pd.DataFrame()
+    for name, cfg in baskets.items():
+        members = [t for t in cfg["tickers"] if t in ticker_z.columns]
+        if not members:
+            continue
+        basket_z[name] = ticker_z[members].mean(axis=1)
+    return {"ticker_z": ticker_z, "basket_z": basket_z}
+
+
+def zscore_crossings(ticker_z: pd.DataFrame, baskets: dict) -> list:
+    """Tickers whose z-score crossed zero between the last two trading days."""
+    if ticker_z.empty or len(ticker_z) < 2:
+        return []
+    prev = ticker_z.iloc[-2]
+    cur = ticker_z.iloc[-1]
+
+    primary = {}
+    for name, cfg in baskets.items():
+        for t in cfg["tickers"]:
+            primary.setdefault(t, name)
+
+    crossings = []
+    for ticker in ticker_z.columns:
+        p, c = prev.get(ticker), cur.get(ticker)
+        if pd.isna(p) or pd.isna(c):
+            continue
+        if p == 0 or c == 0:
+            continue
+        if (p < 0) != (c < 0):
+            crossings.append({
+                "ticker": ticker,
+                "basket": primary.get(ticker, "Other"),
+                "prev_z": float(p),
+                "cur_z": float(c),
+                "direction": "up" if c > 0 else "down",
+            })
+    # Strongest moves first.
+    crossings.sort(key=lambda r: abs(r["cur_z"] - r["prev_z"]), reverse=True)
+    return crossings
+
+
+def leadership_flips(basket_z: pd.DataFrame, lookback_days: int = 5,
+                     min_change: int = 3) -> list:
+    """Baskets whose mean-z rank moved by at least `min_change` vs N days ago."""
+    if basket_z.empty or len(basket_z) <= lookback_days:
+        return []
+    cur = basket_z.iloc[-1].dropna()
+    prev = basket_z.iloc[-1 - lookback_days].dropna()
+    common = cur.index.intersection(prev.index)
+    if len(common) < 2:
+        return []
+    # Rank 1 = highest z.
+    cur_rank = cur[common].rank(ascending=False, method="min").astype(int)
+    prev_rank = prev[common].rank(ascending=False, method="min").astype(int)
+    flips = []
+    for name in common:
+        delta = int(prev_rank[name]) - int(cur_rank[name])  # positive = moved up
+        if abs(delta) >= min_change:
+            flips.append({
+                "basket": name,
+                "prev_rank": int(prev_rank[name]),
+                "cur_rank": int(cur_rank[name]),
+                "delta": delta,
+            })
+    flips.sort(key=lambda r: abs(r["delta"]), reverse=True)
+    return flips
+
+
 def ytd_return(prices: pd.Series) -> float:
     if prices.empty:
         return 0.0
