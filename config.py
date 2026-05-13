@@ -23,6 +23,18 @@ Z_WINDOWS = {
 
 FETCH_PERIOD = "5y"
 
+BENCHMARKS = {
+    "absolute": None,
+    "spy":      "SPY",
+    "qqq":      "QQQ",
+}
+BENCHMARK_LABELS = {
+    "absolute": "Absolute",
+    "spy":      "vs SPY",
+    "qqq":      "vs QQQ",
+}
+REGIME_BENCHMARK = "SPY"
+
 INTERVALS = [
     ("1-Day",    1),
     ("5-Day",    5),

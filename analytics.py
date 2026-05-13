@@ -6,6 +6,56 @@ import pandas as pd
 from config import INTERVALS
 
 
+def relative_panel(prices_df: pd.DataFrame, bench: pd.Series) -> pd.DataFrame:
+    """Return a price-ratio panel: each ticker's price divided by the benchmark's.
+
+    Returns and z-scores derived from this series are excess-of-benchmark.
+    Normalized to start at 100 so the series looks like a regular price line.
+    """
+    if bench is None or bench.empty:
+        return prices_df
+    bench = bench.reindex(prices_df.index).ffill()
+    ratio = prices_df.div(bench, axis=0)
+    first_valid = ratio.apply(lambda s: s.first_valid_index())
+    scale = pd.Series(
+        {c: 100.0 / ratio[c].loc[first_valid[c]] if first_valid[c] is not None else 1.0
+         for c in ratio.columns}
+    )
+    return ratio.mul(scale, axis=1)
+
+
+def market_regime(spy: pd.Series) -> dict:
+    """Classify market regime from SPY price series.
+
+    Returns dict with label, color, and component metrics.
+    """
+    if spy is None or len(spy) < 200:
+        return {"label": "—", "color": "#64748b", "detail": "insufficient data"}
+    ma50 = spy.rolling(50).mean()
+    ma200 = spy.rolling(200).mean()
+    last = spy.iloc[-1]
+    above_50 = last > ma50.iloc[-1]
+    above_200 = last > ma200.iloc[-1]
+    golden = ma50.iloc[-1] > ma200.iloc[-1]
+    slope_20 = (ma50.iloc[-1] / ma50.iloc[-21] - 1) * 100 if len(ma50.dropna()) > 21 else 0.0
+
+    score = int(above_50) + int(above_200) + int(golden) + int(slope_20 > 0)
+    if score >= 3:
+        label, color = "RISK-ON", "#10b981"
+    elif score <= 1:
+        label, color = "RISK-OFF", "#ef4444"
+    else:
+        label, color = "MIXED", "#f59e0b"
+
+    detail = (
+        f"SPY {'>' if above_50 else '<'} 50d, "
+        f"{'>' if above_200 else '<'} 200d · "
+        f"50d {'rising' if slope_20 > 0 else 'falling'} ({slope_20:+.1f}% / 20d)"
+    )
+    return {"label": label, "color": color, "detail": detail,
+            "score": score, "slope_20": slope_20}
+
+
 def ret_pct(prices: pd.Series, lookback: int) -> float:
     n = len(prices)
     if n < lookback + 1:
