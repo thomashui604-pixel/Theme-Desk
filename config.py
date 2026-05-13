@@ -27,11 +27,13 @@ BENCHMARKS = {
     "absolute": None,
     "spy":      "SPY",
     "qqq":      "QQQ",
+    "acwi":     "ACWI",
 }
 BENCHMARK_LABELS = {
     "absolute": "Absolute",
     "spy":      "vs SPY",
     "qqq":      "vs QQQ",
+    "acwi":     "vs ACWI",
 }
 REGIME_BENCHMARK = "SPY"
 

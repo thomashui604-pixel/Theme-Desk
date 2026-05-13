@@ -83,6 +83,52 @@ def rolling_zscore(prices: pd.Series, lookback: int, z_window: int):
     return float(period_ret / period_sigma)
 
 
+def zscore_series(prices: pd.Series, lookback: int, z_window: int) -> pd.Series:
+    """Vectorized rolling z-score time series.
+
+    Mirrors rolling_zscore but returns a value at every timestamp. Baseline
+    volatility at time t is computed over daily returns in
+    [t - z_window - lookback, t - lookback), strictly out of sample.
+    """
+    daily_rets = prices.pct_change()
+    daily_sigma = daily_rets.shift(lookback).rolling(z_window).std(ddof=1)
+    period_sigma = daily_sigma * np.sqrt(lookback) * 100
+    period_ret = prices.pct_change(lookback) * 100
+    z = period_ret / period_sigma.where(period_sigma > 1e-8)
+    return z
+
+
+def rotation_trails(prices_df: pd.DataFrame, baskets: dict,
+                    z_window: int, trail_len: int = 10,
+                    lookbacks: tuple = (5, 20)) -> dict:
+    """Per-basket trail of (z_short, z_long) over the last `trail_len` days."""
+    short_lb, long_lb = lookbacks
+    z_short = pd.DataFrame({
+        t: zscore_series(prices_df[t].dropna(), short_lb, z_window)
+        for t in prices_df.columns
+    })
+    z_long = pd.DataFrame({
+        t: zscore_series(prices_df[t].dropna(), long_lb, z_window)
+        for t in prices_df.columns
+    })
+    trails = {}
+    for name, cfg in baskets.items():
+        members = [t for t in cfg["tickers"] if t in z_short.columns]
+        if not members:
+            continue
+        bs = z_short[members].mean(axis=1).dropna().tail(trail_len)
+        bl = z_long[members].mean(axis=1).dropna().tail(trail_len)
+        idx = bs.index.intersection(bl.index)
+        if len(idx) == 0:
+            continue
+        trails[name] = pd.DataFrame({
+            "date": idx,
+            "z_short": bs.loc[idx].values,
+            "z_long": bl.loc[idx].values,
+        })
+    return trails
+
+
 def ytd_return(prices: pd.Series) -> float:
     if prices.empty:
         return 0.0
