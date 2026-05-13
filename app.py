@@ -135,7 +135,7 @@ def main():
     with tab_baskets:
         render_landing_page(b_stats, stock_df, z_label)
     with tab_rot:
-        render_rotation(b_stats, z_label)
+        render_rotation(b_stats, prices_df, baskets, z_window, z_label)
     with tab_mom:
         render_momentum(stock_df, b_stats, z_label)
     with tab_settings:
