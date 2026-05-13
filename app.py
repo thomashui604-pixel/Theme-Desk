@@ -6,7 +6,7 @@ import streamlit as st
 
 from analytics import basket_stats, build_stock_stats
 from config import FETCH_PERIOD, Z_WINDOWS
-from data import fetch_prices, snapshot_today
+from data import fetch_prices
 from views.baskets import render_landing_page
 from views.common import inject_css
 from views.ranks import render_momentum
@@ -76,8 +76,6 @@ def main():
 
     stock_df = build_stock_stats(prices_df, baskets, z_window)
     b_stats = basket_stats(baskets, stock_df)
-
-    snapshot_today(stock_df, b_stats, prices_df)
 
     tab_baskets, tab_rot, tab_mom, tab_settings = st.tabs([
         "Baskets", "Rotation Map", "Momentum Ranks", "⚙ Settings"
