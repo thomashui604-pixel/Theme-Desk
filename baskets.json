@@ -9,7 +9,6 @@
       "ORCL"
     ]
   },
-
   "SaaS": {
     "color": "#8b5cf6",
     "tickers": [
@@ -31,7 +30,6 @@
       "TYL"
     ]
   },
-
   "Cybersecurity": {
     "color": "#ef4444",
     "tickers": [
@@ -49,7 +47,6 @@
       "RBRK"
     ]
   },
-
   "Neo Clouds": {
     "color": "#0ea5e9",
     "tickers": [
@@ -64,7 +61,6 @@
       "NBIS"
     ]
   },
-
   "AI Infrastructure": {
     "color": "#10b981",
     "tickers": [
@@ -73,10 +69,10 @@
       "HPE",
       "VRT",
       "PSTG",
-      "IESC"
+      "IESC",
+      "CSCO"
     ]
   },
-
   "Networking & AI Connectivity Silicon": {
     "color": "#0f766e",
     "tickers": [
@@ -87,7 +83,6 @@
       "MXL"
     ]
   },
-
   "Optical Hardware": {
     "color": "#0891b2",
     "tickers": [
@@ -99,7 +94,6 @@
       "VIAV"
     ]
   },
-
   "Semis - Compute & Design IP": {
     "color": "#f59e0b",
     "tickers": [
@@ -115,7 +109,6 @@
       "MPWR"
     ]
   },
-
   "Semis - IDM & Foundry": {
     "color": "#3b82f6",
     "tickers": [
@@ -127,7 +120,6 @@
       "STM"
     ]
   },
-
   "Semis - WFE & Back-end": {
     "color": "#2563eb",
     "tickers": [
@@ -141,7 +133,6 @@
       "AMKR"
     ]
   },
-
   "Semis - Analog, Power & MCU": {
     "color": "#14b8a6",
     "tickers": [
