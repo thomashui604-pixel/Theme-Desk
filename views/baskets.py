@@ -156,13 +156,13 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
         bot_html = "".join(_mini_row_html(r["ticker"], r[sort_col], show_z) for _, r in bot3.iterrows())
 
         if show_z:
-            m1_l, m1_v = "1D σ", z_html(b_row["avgZ1d"], 13)
-            m2_l, m2_v = "5D σ", z_html(b_row["avgZ5d"], 13)
-            m3_l, m3_v = "20D σ", z_html(b_row["avgZ20d"], 13)
+            m1_l, m1_v = "1D σ", z_html(b_row["avgZ1d"], 11)
+            m2_l, m2_v = "5D σ", z_html(b_row["avgZ5d"], 11)
+            m3_l, m3_v = "20D σ", z_html(b_row["avgZ20d"], 11)
         else:
-            m1_l, m1_v = "1D", pct_html(b_row["avg1d"], 13)
-            m2_l, m2_v = "5D", pct_html(b_row["avg5d"], 13)
-            m3_l, m3_v = "20D", pct_html(b_row["avg20d"], 13)
+            m1_l, m1_v = "1D", pct_html(b_row["avg1d"], 11)
+            m2_l, m2_v = "5D", pct_html(b_row["avg5d"], 11)
+            m3_l, m3_v = "20D", pct_html(b_row["avg20d"], 11)
 
         perf_color = "#10b981" if is_up else "#ef4444"
         perf_rgb = _rgb(perf_color)
@@ -193,22 +193,22 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
                     </div>
                     {indicator}
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                    <span style="background:rgba({rgb},0.12);color:{color};border:1px solid rgba({rgb},0.25);border-radius:3px;padding:1px 6px;font-size:8px;font-weight:700">{b_row["n"]} STOCKS</span>
-                    {perf_badge}
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+                    <span style="background:rgba({rgb},0.12);color:{color};border:1px solid rgba({rgb},0.25);border-radius:3px;padding:1px 6px;font-size:8px;font-weight:700;white-space:nowrap">{b_row["n"]} STOCKS</span>
+                    <span style="white-space:nowrap">{perf_badge}</span>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
-                    <div style="background:#0b1322;border-radius:5px;padding:6px 8px;text-align:center">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(64px, 1fr));gap:6px;margin-bottom:6px">
+                    <div style="background:#0b1322;border-radius:5px;padding:5px 4px;text-align:center;min-width:0">
                         <div style="font-size:7px;color:#475569;font-weight:600;letter-spacing:0.06em;margin-bottom:2px">{m1_l}</div>
-                        <div>{m1_v}</div>
+                        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{m1_v}</div>
                     </div>
-                    <div style="background:#0b1322;border-radius:5px;padding:6px 8px;text-align:center">
+                    <div style="background:#0b1322;border-radius:5px;padding:5px 4px;text-align:center;min-width:0">
                         <div style="font-size:7px;color:#475569;font-weight:600;letter-spacing:0.06em;margin-bottom:2px">{m2_l}</div>
-                        <div>{m2_v}</div>
+                        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{m2_v}</div>
                     </div>
-                    <div style="background:#0b1322;border-radius:5px;padding:6px 8px;text-align:center">
+                    <div style="background:#0b1322;border-radius:5px;padding:5px 4px;text-align:center;min-width:0">
                         <div style="font-size:7px;color:#475569;font-weight:600;letter-spacing:0.06em;margin-bottom:2px">{m3_l}</div>
-                        <div>{m3_v}</div>
+                        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{m3_v}</div>
                     </div>
                 </div>
                 <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1e293b">
