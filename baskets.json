@@ -123,5 +123,23 @@
       "SITM",
       "SMTC"
     ]
+  },
+  "Semis - Connectivity/Infrastructure silicon": {
+    "color": "#3b82f6",
+    "tickers": [
+      "AVGO",
+      "MRVL",
+      "ALAB",
+      "FN",
+      "COHR",
+      "CRDO",
+      "MXL",
+      "SITM",
+      "LITE",
+      "AAOI",
+      "TSEM",
+      "CIEN",
+      "VIAV"
+    ]
   }
 }
