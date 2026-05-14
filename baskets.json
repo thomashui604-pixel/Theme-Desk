@@ -33,21 +33,12 @@
   "AI Infrastructure": {
     "color": "#10b981",
     "tickers": [
-      "ARM",
       "SMCI",
       "DELL",
-      "CDNS",
       "HPE",
-      "DOCN",
-      "AKAM",
-      "RXT",
-      "ANET",
-      "EQIX",
-      "PSTG",
-      "IBM",
       "VRT",
-      "IESC",
-      "SNPS"
+      "PSTG",
+      "IESC"
     ]
   },
   "Cybersecurity": {
