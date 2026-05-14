@@ -1,6 +1,6 @@
 {
   "Hyperscalers": {
-    "color": "#3b82f6",
+    "color": "#2563eb",
     "tickers": [
       "MSFT",
       "AMZN",
@@ -9,6 +9,7 @@
       "ORCL"
     ]
   },
+
   "SaaS": {
     "color": "#8b5cf6",
     "tickers": [
@@ -30,17 +31,7 @@
       "TYL"
     ]
   },
-  "AI Infrastructure": {
-    "color": "#10b981",
-    "tickers": [
-      "SMCI",
-      "DELL",
-      "HPE",
-      "VRT",
-      "PSTG",
-      "IESC"
-    ]
-  },
+
   "Cybersecurity": {
     "color": "#ef4444",
     "tickers": [
@@ -58,8 +49,9 @@
       "RBRK"
     ]
   },
+
   "Neo Clouds": {
-    "color": "#3b82f6",
+    "color": "#0ea5e9",
     "tickers": [
       "MARA",
       "HUT",
@@ -72,19 +64,48 @@
       "NBIS"
     ]
   },
-  "Semis - Compute GPU/CPU/ASICs": {
+
+  "AI Infrastructure": {
+    "color": "#10b981",
+    "tickers": [
+      "SMCI",
+      "DELL",
+      "HPE",
+      "VRT",
+      "PSTG",
+      "IESC"
+    ]
+  },
+
+  "Networking & Optical Infrastructure": {
+    "color": "#0f766e",
+    "tickers": [
+      "AVGO",
+      "MRVL",
+      "ALAB",
+      "CRDO",
+      "COHR",
+      "LITE",
+      "AAOI",
+      "VIAV",
+      "FN",
+      "CIEN",
+      "MXL"
+    ]
+  },
+
+  "Semis - AI Compute": {
     "color": "#f59e0b",
     "tickers": [
       "NVDA",
       "AMD",
-      "AVGO",
-      "MRVL",
-      "QCOM",
       "ARM",
+      "QCOM",
       "INTC"
     ]
   },
-  "Semis - Foundry": {
+
+  "Semis - Foundry & Manufacturing": {
     "color": "#3b82f6",
     "tickers": [
       "TSM",
@@ -92,27 +113,28 @@
       "UMC",
       "TSEM",
       "STM",
-      "INTC"
+      "INTC",
+      "AMKR"
     ]
   },
-  "Semis - EDA and Wafer Fab Equipment": {
-    "color": "#3b82f6",
+
+  "Semis - EDA & Wafer Fab Equipment": {
+    "color": "#2563eb",
     "tickers": [
       "ASML",
       "AMAT",
       "LRCX",
       "KLAC",
       "TER",
-      "AMKR",
       "MKSI",
       "AEIS",
-      "COHR",
       "SNPS",
       "CDNS"
     ]
   },
-  "Semis - Analog/Power/Industrial": {
-    "color": "#3b82f6",
+
+  "Semis - Analog, Power & Industrial": {
+    "color": "#14b8a6",
     "tickers": [
       "TXN",
       "MPWR",
@@ -121,24 +143,6 @@
       "ON",
       "SITM",
       "SMTC"
-    ]
-  },
-  "Semis - Connectivity/Infrastructure silicon": {
-    "color": "#3b82f6",
-    "tickers": [
-      "AVGO",
-      "MRVL",
-      "ALAB",
-      "FN",
-      "COHR",
-      "CRDO",
-      "MXL",
-      "SITM",
-      "LITE",
-      "AAOI",
-      "TSEM",
-      "CIEN",
-      "VIAV"
     ]
   }
 }
