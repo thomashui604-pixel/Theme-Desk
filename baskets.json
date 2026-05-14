@@ -94,11 +94,12 @@
     ]
   },
 
-  "Semis - Fabless Design & IP": {
+  "Semis - Compute & Design IP": {
     "color": "#f59e0b",
     "tickers": [
       "NVDA",
       "AMD",
+      "INTC",
       "QCOM",
       "ARM",
       "SNPS",
