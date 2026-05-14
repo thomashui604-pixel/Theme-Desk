@@ -18,7 +18,7 @@ def _mini_row_html(ticker, val, show_z=False):
         display = f"{abs(val):.1f}%"
         c = _color(val)
     sign = _sign(val) if val is not None else ""
-    return f'<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px"><span style="color:#94a3b8;font-family:\'IBM Plex Mono\',monospace">{ticker}</span><span style="color:{c};font-family:\'IBM Plex Mono\',monospace;font-weight:600">{sign}{display}</span></div>'
+    return f'<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px"><span style="color:#94a3b8;font-family:\'IBM Plex Mono\',monospace">{ticker}</span><span style="color:{c};font-family:\'IBM Plex Mono\',monospace;font-weight:600">{sign}{display}</span></div>'
 
 
 def _breadth_bar(pct: float) -> str:
@@ -95,7 +95,7 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
     mode_display = "RAW RETURNS %" if st.session_state.display_mode == "returns" else "Z-SCORE MOMENTUM σ"
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
-        <div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.14em;text-transform:uppercase">
+        <div style="font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.14em;text-transform:uppercase">
             ▌ Theme Baskets
         </div>
         <span style="font-size:9px;color:#475569;font-family:'IBM Plex Mono',monospace">
@@ -156,13 +156,13 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
         bot_html = "".join(_mini_row_html(r["ticker"], r[sort_col], show_z) for _, r in bot3.iterrows())
 
         if show_z:
-            m1_l, m1_v = "1D σ", z_html(b_row["avgZ1d"], 11)
-            m2_l, m2_v = "5D σ", z_html(b_row["avgZ5d"], 11)
-            m3_l, m3_v = "20D σ", z_html(b_row["avgZ20d"], 11)
+            m1_l, m1_v = "1D σ", z_html(b_row["avgZ1d"], 13)
+            m2_l, m2_v = "5D σ", z_html(b_row["avgZ5d"], 13)
+            m3_l, m3_v = "20D σ", z_html(b_row["avgZ20d"], 13)
         else:
-            m1_l, m1_v = "1D", pct_html(b_row["avg1d"], 11)
-            m2_l, m2_v = "5D", pct_html(b_row["avg5d"], 11)
-            m3_l, m3_v = "20D", pct_html(b_row["avg20d"], 11)
+            m1_l, m1_v = "1D", pct_html(b_row["avg1d"], 13)
+            m2_l, m2_v = "5D", pct_html(b_row["avg5d"], 13)
+            m3_l, m3_v = "20D", pct_html(b_row["avg20d"], 13)
 
         perf_color = "#10b981" if is_up else "#ef4444"
         perf_rgb = _rgb(perf_color)
@@ -176,7 +176,7 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
 
         perf_sign = "▲" if is_up else "▼"
         perf_display = f"{abs(basket_perf):.2f}σ" if show_z else f"{abs(basket_perf):.2f}%"
-        perf_badge = f'<span style="color:{perf_color};font-family:\'IBM Plex Mono\',monospace;font-weight:700;font-size:12px">{perf_sign} {perf_display}</span>'
+        perf_badge = f'<span style="color:{perf_color};font-family:\'IBM Plex Mono\',monospace;font-weight:700;font-size:14px">{perf_sign} {perf_display}</span>'
 
         glow_style = f"box-shadow:inset 3px 0 8px -4px {'rgba(16,185,129,0.3)' if is_up else 'rgba(239,68,68,0.3)'};"
 
@@ -189,7 +189,7 @@ def render_landing_page(b_stats: pd.DataFrame, stock_df: pd.DataFrame, z_label: 
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
                     <div style="width:3px;height:22px;background:{color};border-radius:2px;flex-shrink:0"></div>
                     <div style="flex:1;min-width:0">
-                        <div style="font-size:13px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{basket_name}</div>
+                        <div style="font-size:16px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{basket_name}</div>
                     </div>
                     {indicator}
                 </div>
@@ -263,7 +263,7 @@ def render_expanded_detail(basket_name, cfg, b_row, members_df,
     show_z = st.session_state.display_mode == "zscore"
 
     if show_z:
-        st.markdown('<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Momentum Regime (Avg Z-Score)</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Momentum Regime (Avg Z-Score)</div>', unsafe_allow_html=True)
         metric_cols = st.columns(len(INTERVALS) + 1)
         for i, (label, lb) in enumerate(INTERVALS):
             val = b_row[f"avgZ_{lb}"]
@@ -271,7 +271,7 @@ def render_expanded_detail(basket_name, cfg, b_row, members_df,
         zytd_val = b_row["avgZ_ytd"]
         metric_cols[-1].metric("YTD σ", f"{'+' if zytd_val >= 0 else ''}{zytd_val:.2f}σ")
     else:
-        st.markdown('<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket Performance (Avg Raw %)</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket Performance (Avg Raw %)</div>', unsafe_allow_html=True)
         metric_cols = st.columns(len(INTERVALS) + 1)
         for i, (label, lb) in enumerate(INTERVALS):
             val = b_row[f"avg_ret_{lb}"]
@@ -296,23 +296,23 @@ def render_expanded_detail(basket_name, cfg, b_row, members_df,
         data_cells = ""
         if show_z:
             for _, lb in INTERVALS:
-                data_cells += f'<td style="padding:6px 10px;text-align:right">{z_html(row[f"z_{lb}"], 11)}</td>'
-            data_cells += f'<td style="padding:6px 10px;text-align:right">{z_html(row["z_ytd"], 11)}</td>'
+                data_cells += f'<td style="padding:6px 10px;text-align:right">{z_html(row[f"z_{lb}"], 13)}</td>'
+            data_cells += f'<td style="padding:6px 10px;text-align:right">{z_html(row["z_ytd"], 13)}</td>'
         else:
             for _, lb in INTERVALS:
-                data_cells += f'<td style="padding:6px 10px;text-align:right">{pct_html(row[f"ret_{lb}"], 11)}</td>'
-            data_cells += f'<td style="padding:6px 10px;text-align:right">{pct_html(row["ret_ytd"], 11)}</td>'
+                data_cells += f'<td style="padding:6px 10px;text-align:right">{pct_html(row[f"ret_{lb}"], 13)}</td>'
+            data_cells += f'<td style="padding:6px 10px;text-align:right">{pct_html(row["ret_ytd"], 13)}</td>'
 
         rows_html += f"""
         <tr style="border-bottom:1px solid #0f172a">
-            <td style="padding:6px 10px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-size:11px;white-space:nowrap">{row["ticker"]}</td>
-            <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-family:'IBM Plex Mono',monospace;font-size:11px">${row["price"]:.2f}</td>
+            <td style="padding:6px 10px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-size:13px;white-space:nowrap">{row["ticker"]}</td>
+            <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-family:'IBM Plex Mono',monospace;font-size:13px">${row["price"]:.2f}</td>
             {data_cells}
         </tr>"""
 
     st.html(f"""
     <div style="background:#080f1a;border:1px solid rgba({rgb},0.25);border-radius:8px;overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
             <thead>
                 <tr style="border-bottom:1px solid #1e293b;background:#0f172a">
                     <th></th><th></th>
@@ -348,8 +348,8 @@ def _ticker_dialog(ticker: str, basket_name: str, prices_df: pd.DataFrame):
         return
 
     st.markdown(
-        f'<div style="font-size:11px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">'
-        f'<span style="color:#e2e8f0;font-weight:700;font-size:14px;font-family:\'IBM Plex Mono\',monospace">{ticker}</span>'
+        f'<div style="font-size:13px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">'
+        f'<span style="color:#e2e8f0;font-weight:700;font-size:17px;font-family:\'IBM Plex Mono\',monospace">{ticker}</span>'
         f' &nbsp;·&nbsp; in {basket_name} &nbsp;·&nbsp; last 12 months</div>',
         unsafe_allow_html=True,
     )
@@ -420,7 +420,7 @@ def _render_quality_section(cfg, q, prices_df, rgb):
     if prices_df is None or not cfg.get("tickers"):
         return
 
-    st.markdown('<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket quality</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket quality</div>', unsafe_allow_html=True)
 
     m_col, h_col = st.columns([1, 2])
     with m_col:
@@ -432,15 +432,15 @@ def _render_quality_section(cfg, q, prices_df, rgb):
             <div style="display:flex;flex-direction:column;gap:14px">
                 <div>
                     <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">BREADTH · % &gt; 50D MA</div>
-                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{b_txt}</div>
+                    <div style="font-size:22px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{b_txt}</div>
                 </div>
                 <div>
                     <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">DISPERSION · σ OF 20D RETURNS</div>
-                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{d_txt}</div>
+                    <div style="font-size:22px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{d_txt}</div>
                 </div>
                 <div>
                     <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:0.08em;margin-bottom:4px">MEAN PAIRWISE CORR · 60D</div>
-                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{c_txt}</div>
+                    <div style="font-size:22px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{c_txt}</div>
                 </div>
             </div>
         </div>
@@ -449,7 +449,7 @@ def _render_quality_section(cfg, q, prices_df, rgb):
     with h_col:
         corr = basket_correlation_matrix(prices_df, cfg["tickers"], window=60)
         if corr.empty:
-            st.html(f'<div style="background:#080f1a;border:1px solid rgba({rgb},0.25);border-radius:8px;padding:14px 16px;color:#475569;font-size:11px">Not enough constituents for a correlation matrix.</div>')
+            st.html(f'<div style="background:#080f1a;border:1px solid rgba({rgb},0.25);border-radius:8px;padding:14px 16px;color:#475569;font-size:13px">Not enough constituents for a correlation matrix.</div>')
             return
         fig = go.Figure(data=go.Heatmap(
             z=corr.values,

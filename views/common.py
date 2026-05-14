@@ -11,7 +11,7 @@ CSS = """
 .stTabs [data-baseweb="tab"] {
     background: transparent !important; color: #475569 !important;
     padding: 12px 20px; border: none !important;
-    font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+    font-size:14px; font-weight: 600; letter-spacing: 0.04em;
 }
 .stTabs [aria-selected="true"] { color: #f59e0b !important; border-bottom: 2px solid #f59e0b !important; }
 .stTabs [data-baseweb="tab-panel"] { background: transparent; padding-top: 24px; }
@@ -22,8 +22,8 @@ div[data-testid="metric-container"] {
     border-radius: 8px;
     padding: 14px 18px !important;
 }
-div[data-testid="metric-container"] label { color: #475569 !important; font-size: 10px !important; letter-spacing: 0.06em; text-transform: uppercase; }
-div[data-testid="metric-container"] [data-testid="stMetricValue"] { font-family: 'IBM Plex Mono', monospace; font-size: 18px !important; }
+div[data-testid="metric-container"] label { color: #475569 !important; font-size:12px !important; letter-spacing: 0.06em; text-transform: uppercase; }
+div[data-testid="metric-container"] [data-testid="stMetricValue"] { font-family: 'IBM Plex Mono', monospace; font-size:22px !important; }
 
 h1, h2, h3, p, div { color: #e2e8f0; }
 .stMarkdown p { color: #94a3b8; }
@@ -33,7 +33,7 @@ h1, h2, h3, p, div { color: #e2e8f0; }
     border: 1px solid #1e293b !important;
     color: #94a3b8 !important;
     border-radius: 6px;
-    font-size: 11px;
+    font-size:13px;
     transition: all 0.15s;
 }
 .stButton > button:hover { border-color: #334155 !important; color: #e2e8f0 !important; }
@@ -51,7 +51,7 @@ hr { border-color: #1e293b !important; }
     border: 1px solid #1e293b;
     border-radius: 6px;
     padding: 10px 16px;
-    font-size: 11px;
+    font-size:13px;
     color: #475569;
     margin-bottom: 14px;
 }
@@ -59,7 +59,7 @@ hr { border-color: #1e293b !important; }
     display: inline-flex; align-items: center; gap: 6px;
     background: #052010; border: 1px solid rgba(16,185,129,0.2);
     border-radius: 5px; padding: 4px 12px;
-    font-size: 11px; color: #10b981; font-weight: 700;
+    font-size:13px; color: #10b981; font-weight: 700;
 }
 
 #MainMenu { visibility: hidden; }
@@ -77,7 +77,7 @@ header { visibility: hidden; }
         margin-bottom: 8px;
     }
     .block-container { padding: 0.75rem !important; }
-    .stTabs [data-baseweb="tab"] { padding: 10px 12px; font-size: 11px; }
+    .stTabs [data-baseweb="tab"] { padding: 10px 12px; font-size:13px; }
 }
 </style>
 """
@@ -95,12 +95,12 @@ def _color(v):
     return "#10b981" if v >= 0 else "#ef4444"
 
 
-def pct_html(v, size=13):
+def pct_html(v, size=16):
     c = _color(v)
     return f'<span style="color:{c};font-family:\'IBM Plex Mono\',monospace;font-weight:700;font-size:{size}px">{_sign(v)} {abs(v):.2f}%</span>'
 
 
-def z_html(v, size=13):
+def z_html(v, size=16):
     if v is None:
         return '<span style="color:#334155">—</span>'
     c = _color(v)
