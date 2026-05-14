@@ -354,21 +354,36 @@ def _ticker_dialog(ticker: str, basket_name: str, prices_df: pd.DataFrame):
         unsafe_allow_html=True,
     )
 
-    # Price (rebased to 100)
-    rebased = series / series.iloc[0] * 100
+    # Raw candlestick — fetched on demand for the single ticker.
+    from data import fetch_ohlc
+    ohlc = fetch_ohlc(ticker, period="1y")
     price_fig = go.Figure()
-    price_fig.add_trace(go.Scatter(
-        x=rebased.index, y=rebased.values, mode="lines",
-        line=dict(color="#f59e0b", width=1.6),
-        hovertemplate="%{x|%b %d, %Y}<br>%{y:.1f} (rebased)<extra></extra>",
-    ))
+    if not ohlc.empty and {"Open", "High", "Low", "Close"}.issubset(ohlc.columns):
+        price_fig.add_trace(go.Candlestick(
+            x=ohlc.index,
+            open=ohlc["Open"], high=ohlc["High"],
+            low=ohlc["Low"], close=ohlc["Close"],
+            increasing_line_color="#10b981", increasing_fillcolor="#10b981",
+            decreasing_line_color="#ef4444", decreasing_fillcolor="#ef4444",
+            line=dict(width=1),
+            whiskerwidth=0.3,
+            name=ticker,
+        ))
+    else:
+        # Fallback to the close series we already have.
+        price_fig.add_trace(go.Scatter(
+            x=series.index, y=series.values, mode="lines",
+            line=dict(color="#f59e0b", width=1.6),
+            hovertemplate="%{x|%b %d, %Y}<br>$%{y:.2f}<extra></extra>",
+        ))
     price_fig.update_layout(
         **{**PLOTLY_LAYOUT,
-           "height": 220,
+           "height": 260,
            "margin": dict(l=40, r=20, t=10, b=30),
            "showlegend": False,
+           "xaxis": {**PLOTLY_LAYOUT["xaxis"], "rangeslider": dict(visible=False)},
            "yaxis": {**PLOTLY_LAYOUT["yaxis"],
-                     "title": dict(text="Price (rebased=100)", font=dict(color="#475569", size=9))}},
+                     "title": dict(text="Price ($)", font=dict(color="#475569", size=10))}},
     )
     st.plotly_chart(price_fig, use_container_width=True, config={"displayModeBar": False})
 
