@@ -103,7 +103,8 @@
       "QCOM",
       "ARM",
       "SNPS",
-      "CDNS"
+      "CDNS",
+      "MPWR"
     ]
   },
 
@@ -141,6 +142,8 @@
       "MCHP",
       "NXPI",
       "ON",
+      "STM",
+      "TSEM",
       "SITM",
       "SMTC"
     ]
