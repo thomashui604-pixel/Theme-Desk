@@ -44,7 +44,8 @@ h1, h2, h3, p, div { color: #e2e8f0; }
 
 [data-testid="stDataFrame"] { border: 1px solid #1e293b; border-radius: 8px; }
 hr { border-color: #1e293b !important; }
-.block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
+.block-container { padding-top: 4rem; padding-bottom: 2rem; }
+[data-testid="stHeader"] { background: transparent; }
 
 .info-box {
     background: #080f1a;
