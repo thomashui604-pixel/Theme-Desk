@@ -77,20 +77,26 @@
     ]
   },
 
-  "Networking & Optical Infrastructure": {
+  "Networking & AI Connectivity Silicon": {
     "color": "#0f766e",
     "tickers": [
       "AVGO",
       "MRVL",
       "ALAB",
       "CRDO",
+      "MXL"
+    ]
+  },
+
+  "Optical Hardware": {
+    "color": "#0891b2",
+    "tickers": [
       "COHR",
       "LITE",
       "AAOI",
-      "VIAV",
       "FN",
       "CIEN",
-      "MXL"
+      "VIAV"
     ]
   },
 
@@ -99,6 +105,8 @@
     "tickers": [
       "NVDA",
       "AMD",
+      "AVGO",
+      "MRVL",
       "INTC",
       "QCOM",
       "ARM",
