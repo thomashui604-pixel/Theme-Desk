@@ -8,7 +8,7 @@ from analytics import basket_quality, basket_stats, build_stock_stats, market_re
 from config import BENCHMARKS, BENCHMARK_LABELS, FETCH_PERIOD, REGIME_BENCHMARK, Z_WINDOWS
 from data import fetch_prices, missing_tickers
 from views.baskets import render_landing_page
-from views.common import inject_css
+from views.common import _rgb, inject_css
 from views.ranks import render_momentum
 from views.rotation import render_rotation
 from views.settings import load_default_baskets, render_settings
@@ -64,7 +64,7 @@ def _init_session_state() -> None:
     if "editing_basket" not in st.session_state:
         st.session_state.editing_basket = None
     if "selected_basket" not in st.session_state:
-        st.session_state.selected_basket = list(st.session_state.baskets.keys())[0]
+        st.session_state.selected_basket = next(iter(st.session_state.baskets), None)
     if "expanded_basket" not in st.session_state:
         st.session_state.expanded_basket = None
 
@@ -77,17 +77,12 @@ def _init_session_state() -> None:
 
 def _render_regime_badge(regime: dict) -> str:
     return f"""
-    <div style="display:inline-flex;align-items:center;gap:8px;background:#080f1a;border:1px solid rgba({_rgb_from_hex(regime['color'])},0.35);border-radius:6px;padding:6px 12px">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:#080f1a;border:1px solid rgba({_rgb(regime['color'])},0.35);border-radius:6px;padding:6px 12px">
         <span style="width:6px;height:6px;border-radius:50%;background:{regime['color']};box-shadow:0 0 6px {regime['color']}"></span>
         <span style="font-size:13px;font-weight:700;color:{regime['color']};letter-spacing:0.08em">{regime['label']}</span>
         <span style="font-size:9px;color:#475569;font-family:'IBM Plex Mono',monospace">{regime['detail']}</span>
     </div>
     """
-
-
-def _rgb_from_hex(hex_color: str) -> str:
-    h = hex_color.lstrip("#")
-    return f"{int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)}"
 
 
 def main():

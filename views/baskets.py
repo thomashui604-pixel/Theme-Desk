@@ -457,7 +457,15 @@ def _render_quality_section(cfg, q, prices_df, rgb):
     if prices_df is None or not cfg.get("tickers"):
         return
 
-    st.markdown('<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket quality</div>', unsafe_allow_html=True)
+    bench_mode = st.session_state.get("benchmark_mode", "absolute")
+    frame_suffix = {"absolute": "",
+                    "spy":  " · vs SPY",
+                    "qqq":  " · vs QQQ",
+                    "acwi": " · vs ACWI"}.get(bench_mode, "")
+    st.markdown(
+        f'<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #1e293b;padding-bottom:4px;margin-bottom:8px">Basket quality<span style="color:#475569;font-weight:600">{frame_suffix}</span></div>',
+        unsafe_allow_html=True,
+    )
 
     m_col, h_col = st.columns([1, 2])
     with m_col:

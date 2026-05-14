@@ -65,10 +65,6 @@ def ret_pct(prices: pd.Series, lookback: int) -> float:
     return ((cur - prev) / prev) * 100 if prev != 0 else 0.0
 
 
-def rolling_return_series(prices: pd.Series, lookback: int) -> pd.Series:
-    return prices.pct_change(lookback).dropna() * 100
-
-
 def rolling_zscore(prices: pd.Series, lookback: int, z_window: int):
     daily_rets = prices.pct_change().dropna()
     if len(daily_rets) < z_window + lookback:
