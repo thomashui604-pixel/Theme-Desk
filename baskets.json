@@ -103,5 +103,22 @@
       "STM",
       "INTC"
     ]
+  },
+  "Semis - EDA and Wafer Fab Equipment": {
+    "color": "#3b82f6",
+    "tickers": [
+      "ASML",
+      "AMAT",
+      "LRCX",
+      "KLAC",
+      "TER",
+      "AMKR",
+      "MKSI",
+      "AEIS",
+      "COHR",
+      "SNPS",
+      "CDNS",
+      "ARM"
+    ]
   }
 }
