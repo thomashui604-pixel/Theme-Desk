@@ -16,7 +16,7 @@ def _basket_cumret(prices_df: pd.DataFrame, tickers: list, window: int = 126) ->
         return pd.Series(dtype=float)
     mean_rets = rets.mean(axis=1)
     return (1 + mean_rets).cumprod() * 100
-from views.common import PLOTLY_LAYOUT, _color, _rgb, _sign, pct_html, z_html
+from views.common import PLOTLY_LAYOUT, _rgb, pct_html, z_html
 
 
 def _section_header(title: str, accent: str = "#f59e0b"):
@@ -211,11 +211,17 @@ def _render_compare(prices_df: pd.DataFrame, baskets: dict):
     rs_color = "#10b981" if latest_rs >= 100 else "#ef4444"
     rs_arrow = "▲" if latest_rs >= 100 else "▼"
     rs_pct = latest_rs - 100
+    bench_mode = st.session_state.get("benchmark_mode", "absolute")
+    frame = {"absolute": "absolute returns",
+             "spy": "excess vs SPY",
+             "qqq": "excess vs QQQ",
+             "acwi": "excess vs ACWI"}.get(bench_mode, "absolute returns")
     st.markdown(
         f'<div style="font-size:13px;color:#94a3b8;margin-top:6px">'
         f'Over last ~6 months, <b style="color:{a_cfg["color"]}">{a_name}</b> is '
         f'<span style="color:{rs_color};font-weight:700;font-family:\'IBM Plex Mono\',monospace">'
-        f'{rs_arrow} {abs(rs_pct):.1f}%</span> vs <b style="color:{b_cfg["color"]}">{b_name}</b>.'
+        f'{rs_arrow} {abs(rs_pct):.1f}%</span> vs <b style="color:{b_cfg["color"]}">{b_name}</b> '
+        f'<span style="color:#475569">({frame})</span>.'
         f'</div>',
         unsafe_allow_html=True,
     )

@@ -22,7 +22,7 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
     <div class="info-box">
         <strong style="color:#f59e0b">σ</strong>&nbsp;
         Axes show <strong style="color:#94a3b8">z-scores</strong> — each basket's return divided by its own {z_label.split("(")[0].strip()} rolling std dev.
-        Each basket shows where it stood <strong style="color:#94a3b8">20 trading days ago</strong> (faint dot) connected to <strong style="color:#94a3b8">today</strong> (bright dot).
+        Each basket shows where it stood <strong style="color:#94a3b8">~20 trading days ago</strong> (faint dot) connected to <strong style="color:#94a3b8">today</strong> (bright dot). For newer tickers the trail starts from the earliest available data instead — see the tooltip for the actual date.
         Direction matters more than location.
     </div>
     """, unsafe_allow_html=True)
