@@ -13,9 +13,9 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
     st.markdown("""
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
         <div style="width:3px;height:20px;background:#f59e0b;border-radius:2px"></div>
-        <span style="font-size:13px;font-weight:700;color:#e2e8f0">Thematic Rotation Map</span>
+        <span style="font-size:16px;font-weight:700;color:#e2e8f0">Thematic Rotation Map</span>
     </div>
-    <div style="font-size:11px;color:#475569;margin-left:13px">RRG-style trails — each basket's path through (5d z, 20d z) over the last N days</div>
+    <div style="font-size:13px;color:#475569;margin-left:13px">RRG-style trails — each basket's path through (5d z, 20d z) over the last N days</div>
     """, unsafe_allow_html=True)
 
     st.markdown(f"""
@@ -169,8 +169,8 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
                 <div style="display:flex;align-items:center;gap:10px">
                     <div style="width:4px;height:32px;background:{color};border-radius:2px;flex-shrink:0"></div>
                     <div>
-                        <div style="font-weight:700;font-size:13px;color:#e2e8f0">{row["basket"]}</div>
-                        <div style="font-size:10px;color:#475569;margin-top:2px">{tickers_str}</div>
+                        <div style="font-weight:700;font-size:16px;color:#e2e8f0">{row["basket"]}</div>
+                        <div style="font-size:12px;color:#475569;margin-top:2px">{tickers_str}</div>
                     </div>
                 </div>
             </td>
@@ -180,7 +180,7 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
 
     st.html(f"""
     <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;overflow:hidden">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
             <tbody>{rows_html}</tbody>
         </table>
     </div>

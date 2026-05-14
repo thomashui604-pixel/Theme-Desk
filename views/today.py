@@ -23,7 +23,7 @@ def _section_header(title: str, accent: str = "#f59e0b"):
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:10px;margin:18px 0 8px 0">
         <div style="width:3px;height:18px;background:{accent};border-radius:2px"></div>
-        <span style="font-size:12px;font-weight:700;color:#e2e8f0;letter-spacing:0.06em;text-transform:uppercase">{title}</span>
+        <span style="font-size:14px;font-weight:700;color:#e2e8f0;letter-spacing:0.06em;text-transform:uppercase">{title}</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -38,14 +38,14 @@ def _movers_card(df: pd.DataFrame, is_top: bool, baskets: dict):
         rgb = _rgb(color)
         rows_html += f"""
         <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #0f172a">
-            <span style="width:50px;font-size:11px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{row['ticker']}</span>
+            <span style="width:50px;font-size:13px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{row['ticker']}</span>
             <span style="flex:1;font-size:9px;color:{color};background:rgba({rgb},0.13);border:1px solid rgba({rgb},0.27);border-radius:3px;padding:1px 6px;font-weight:700;width:fit-content;flex:0 0 auto">{row['basket'][:10]}</span>
-            <span style="margin-left:auto">{pct_html(row['ret1d'], 12)}</span>
+            <span style="margin-left:auto">{pct_html(row['ret1d'], 14)}</span>
         </div>"""
     st.html(f"""
     <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:14px 16px">
-        <div style="font-size:10px;font-weight:700;color:{accent};letter-spacing:0.1em;margin-bottom:8px">{label}</div>
-        {rows_html if rows_html else '<div style="color:#475569;font-size:11px">No data</div>'}
+        <div style="font-size:12px;font-weight:700;color:{accent};letter-spacing:0.1em;margin-bottom:8px">{label}</div>
+        {rows_html if rows_html else '<div style="color:#475569;font-size:13px">No data</div>'}
     </div>
     """)
 
@@ -59,15 +59,15 @@ def _crossings_card(crossings: list, baskets: dict, max_show: int = 8):
         arrow_color = "#10b981" if r["direction"] == "up" else "#ef4444"
         rows_html += f"""
         <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #0f172a">
-            <span style="color:{arrow_color};font-size:14px;font-weight:900;width:14px">{arrow}</span>
-            <span style="width:50px;font-size:11px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{r['ticker']}</span>
+            <span style="color:{arrow_color};font-size:17px;font-weight:900;width:14px">{arrow}</span>
+            <span style="width:50px;font-size:13px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{r['ticker']}</span>
             <span style="font-size:9px;color:{color};background:rgba({rgb},0.13);border:1px solid rgba({rgb},0.27);border-radius:3px;padding:1px 6px;font-weight:700">{r['basket'][:10]}</span>
-            <span style="margin-left:auto;font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace">{r['prev_z']:+.2f}σ → <span style="color:{arrow_color};font-weight:700">{r['cur_z']:+.2f}σ</span></span>
+            <span style="margin-left:auto;font-size:12px;color:#64748b;font-family:'IBM Plex Mono',monospace">{r['prev_z']:+.2f}σ → <span style="color:{arrow_color};font-weight:700">{r['cur_z']:+.2f}σ</span></span>
         </div>"""
-    body = rows_html if rows_html else '<div style="color:#475569;font-size:11px">No z-score crossings today.</div>'
+    body = rows_html if rows_html else '<div style="color:#475569;font-size:13px">No z-score crossings today.</div>'
     st.html(f"""
     <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:14px 16px">
-        <div style="font-size:10px;font-weight:700;color:#f59e0b;letter-spacing:0.1em;margin-bottom:8px">⤢ 20D Z-SCORE CROSSINGS</div>
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;letter-spacing:0.1em;margin-bottom:8px">⤢ 20D Z-SCORE CROSSINGS</div>
         <div style="font-size:9px;color:#475569;margin-bottom:8px">Tickers that flipped above/below zero since yesterday</div>
         {body}
     </div>
@@ -85,14 +85,14 @@ def _flips_card(flips: list, baskets: dict):
         rows_html += f"""
         <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #0f172a">
             <span style="width:4px;height:22px;background:{color};border-radius:2px"></span>
-            <span style="flex:1;font-size:11px;font-weight:700;color:#e2e8f0">{f['basket']}</span>
-            <span style="font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace">#{f['prev_rank']} → #{f['cur_rank']}</span>
-            <span style="color:{arrow_color};font-size:12px;font-weight:900;font-family:'IBM Plex Mono',monospace">{arrow} {abs(delta)}</span>
+            <span style="flex:1;font-size:13px;font-weight:700;color:#e2e8f0">{f['basket']}</span>
+            <span style="font-size:12px;color:#64748b;font-family:'IBM Plex Mono',monospace">#{f['prev_rank']} → #{f['cur_rank']}</span>
+            <span style="color:{arrow_color};font-size:14px;font-weight:900;font-family:'IBM Plex Mono',monospace">{arrow} {abs(delta)}</span>
         </div>"""
-    body = rows_html if rows_html else '<div style="color:#475569;font-size:11px">No significant leadership flips in the last 5 days.</div>'
+    body = rows_html if rows_html else '<div style="color:#475569;font-size:13px">No significant leadership flips in the last 5 days.</div>'
     st.html(f"""
     <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:14px 16px">
-        <div style="font-size:10px;font-weight:700;color:#8b5cf6;letter-spacing:0.1em;margin-bottom:8px">↻ LEADERSHIP FLIPS · 5D</div>
+        <div style="font-size:12px;font-weight:700;color:#8b5cf6;letter-spacing:0.1em;margin-bottom:8px">↻ LEADERSHIP FLIPS · 5D</div>
         <div style="font-size:9px;color:#475569;margin-bottom:8px">Baskets whose 20d-z rank shifted by ≥3 positions</div>
         {body}
     </div>
@@ -120,12 +120,12 @@ def _sparkline_row(basket: str, color: str, series: pd.Series, latest: float):
         st.markdown(
             f'<div style="display:flex;align-items:center;gap:8px;padding-top:18px">'
             f'<div style="width:3px;height:18px;background:{color};border-radius:2px"></div>'
-            f'<span style="font-size:12px;font-weight:700;color:#e2e8f0">{basket}</span></div>',
+            f'<span style="font-size:14px;font-weight:700;color:#e2e8f0">{basket}</span></div>',
             unsafe_allow_html=True,
         )
     with col_val:
         st.markdown(
-            f'<div style="padding-top:18px;text-align:right">{z_html(latest, 13)}</div>',
+            f'<div style="padding-top:18px;text-align:right">{z_html(latest, 16)}</div>',
             unsafe_allow_html=True,
         )
     with col_spark:
@@ -212,7 +212,7 @@ def _render_compare(prices_df: pd.DataFrame, baskets: dict):
     rs_arrow = "▲" if latest_rs >= 100 else "▼"
     rs_pct = latest_rs - 100
     st.markdown(
-        f'<div style="font-size:11px;color:#94a3b8;margin-top:6px">'
+        f'<div style="font-size:13px;color:#94a3b8;margin-top:6px">'
         f'Over last ~6 months, <b style="color:{a_cfg["color"]}">{a_name}</b> is '
         f'<span style="color:{rs_color};font-weight:700;font-family:\'IBM Plex Mono\',monospace">'
         f'{rs_arrow} {abs(rs_pct):.1f}%</span> vs <b style="color:{b_cfg["color"]}">{b_name}</b>.'
@@ -225,8 +225,8 @@ def render_today(stock_df: pd.DataFrame, prices_df: pd.DataFrame,
                  baskets: dict, z_window: int, regime: dict):
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:#e2e8f0">What changed</div>
-        <span style="font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace">
+        <div style="font-size:17px;font-weight:700;color:#e2e8f0">What changed</div>
+        <span style="font-size:12px;color:#64748b;font-family:'IBM Plex Mono',monospace">
             Regime: <span style="color:{regime['color']};font-weight:700">{regime['label']}</span>
             &nbsp;·&nbsp; {regime['detail']}
         </span>

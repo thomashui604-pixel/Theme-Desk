@@ -50,7 +50,7 @@ def render_settings():
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
-        st.markdown('<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Theme Baskets</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:13px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Theme Baskets</div>', unsafe_allow_html=True)
 
         for name, cfg in st.session_state.baskets.items():
             col_sel, col_edit = st.columns([5, 1])
@@ -75,7 +75,7 @@ def render_settings():
             existing = {} if is_new else st.session_state.baskets.get(editing, {})
 
             st.markdown(
-                f'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:12px">{"New Basket" if is_new else f"Edit · {editing}"}</div>',
+                f'<div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:12px">{"New Basket" if is_new else f"Edit · {editing}"}</div>',
                 unsafe_allow_html=True,
             )
 
@@ -134,7 +134,7 @@ def render_settings():
                     st.rerun()
 
     with col_right:
-        st.markdown('<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Config</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:13px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Config</div>', unsafe_allow_html=True)
 
         basket_json = json.dumps(st.session_state.baskets, indent=2)
         st.download_button("⬇ Export baskets.json", data=basket_json, file_name="baskets.json", mime="application/json", use_container_width=True)
@@ -151,7 +151,7 @@ def render_settings():
                 st.error(f"Invalid file: {e}")
 
         st.markdown("<div style='height:24px'/>", unsafe_allow_html=True)
-        st.markdown('<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Ticker Diagnostics</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:13px;font-weight:700;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Ticker Diagnostics</div>', unsafe_allow_html=True)
 
         baskets = st.session_state.baskets
         has_issues = False
@@ -168,9 +168,9 @@ def render_settings():
                 for t, c in dupes.items():
                     diag_html += f"""
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                        <span style="color:#ef4444;font-size:12px;font-weight:900">✕</span>
-                        <span style="font-size:11px;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-weight:700">{t}</span>
-                        <span style="font-size:10px;color:#94a3b8">repeated {c}× in</span>
+                        <span style="color:#ef4444;font-size:14px;font-weight:900">✕</span>
+                        <span style="font-size:13px;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-weight:700">{t}</span>
+                        <span style="font-size:12px;color:#94a3b8">repeated {c}× in</span>
                         <span style="background:rgba({_rgb(color)},0.13);color:{color};border:1px solid rgba({_rgb(color)},0.27);border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">{name}</span>
                     </div>"""
 
@@ -188,13 +188,13 @@ def render_settings():
                     tags += f'<span style="background:rgba({_rgb(color)},0.13);color:{color};border:1px solid rgba({_rgb(color)},0.27);border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">{b}</span> '
                 diag_html += f"""
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-                    <span style="color:#64748b;font-size:11px">·</span>
-                    <span style="font-size:11px;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-weight:700">{t}</span>
-                    <span style="font-size:10px;color:#64748b">in {len(bs)} baskets:</span>
+                    <span style="color:#64748b;font-size:13px">·</span>
+                    <span style="font-size:13px;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;font-weight:700">{t}</span>
+                    <span style="font-size:12px;color:#64748b">in {len(bs)} baskets:</span>
                     {tags}
                 </div>"""
 
         if has_issues:
             st.html(f'<div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:16px">{diag_html}</div>')
         else:
-            st.html('<div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:16px;display:flex;align-items:center;gap:8px"><span style="color:#10b981;font-size:12px;font-weight:900">✓</span><span style="font-size:11px;color:#10b981;font-weight:600">All clean — no duplicate tickers found</span></div>')
+            st.html('<div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:16px;display:flex;align-items:center;gap:8px"><span style="color:#10b981;font-size:14px;font-weight:900">✓</span><span style="font-size:13px;color:#10b981;font-weight:600">All clean — no duplicate tickers found</span></div>')

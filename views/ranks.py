@@ -12,7 +12,7 @@ def render_momentum(stock_df: pd.DataFrame, b_stats: pd.DataFrame, z_label: str)
         st.markdown("""
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
             <div style="width:3px;height:20px;background:#f59e0b;border-radius:2px"></div>
-            <span style="font-size:13px;font-weight:700;color:#e2e8f0">Cross-Basket Momentum Ranks</span>
+            <span style="font-size:16px;font-weight:700;color:#e2e8f0">Cross-Basket Momentum Ranks</span>
         </div>
         """, unsafe_allow_html=True)
     with col_mode:
@@ -39,7 +39,7 @@ def render_momentum(stock_df: pd.DataFrame, b_stats: pd.DataFrame, z_label: str)
             rows += f"""
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
                 <span style="width:16px;font-size:9px;color:#475569;font-family:'IBM Plex Mono',monospace;text-align:right">{rank}</span>
-                <span style="width:46px;font-size:11px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{row["ticker"]}</span>
+                <span style="width:46px;font-size:13px;font-weight:700;color:#e2e8f0;font-family:'IBM Plex Mono',monospace">{row["ticker"]}</span>
                 <div style="flex:1;background:#0f172a;border-radius:2px;height:14px;position:relative;overflow:hidden">
                     <div style="position:absolute;{bar_dir}:0;top:0;bottom:0;width:{bar_w}%;background:{bar_color};opacity:0.7;border-radius:2px"></div>
                 </div>
@@ -52,14 +52,14 @@ def render_momentum(stock_df: pd.DataFrame, b_stats: pd.DataFrame, z_label: str)
     with col_top:
         st.html(f"""
         <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:20px">
-            <div style="font-size:10px;font-weight:700;color:#10b981;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">▲ Top z-score ({mode})</div>
+            <div style="font-size:12px;font-weight:700;color:#10b981;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">▲ Top z-score ({mode})</div>
             {rank_rows_html(top5, True)}
         </div>
         """)
     with col_bot:
         st.html(f"""
         <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:20px">
-            <div style="font-size:10px;font-weight:700;color:#ef4444;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">▼ Bottom z-score ({mode})</div>
+            <div style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">▼ Bottom z-score ({mode})</div>
             {rank_rows_html(bot5, False)}
         </div>
         """)
@@ -80,7 +80,7 @@ def render_momentum(stock_df: pd.DataFrame, b_stats: pd.DataFrame, z_label: str)
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <span style="width:16px;font-size:9px;color:#475569;font-family:'IBM Plex Mono',monospace;text-align:right">{rank}</span>
             <span style="width:4px;height:24px;background:{color};border-radius:2px;flex-shrink:0"></span>
-            <span style="width:110px;font-size:11px;font-weight:700;color:#e2e8f0">{row["basket"]}</span>
+            <span style="width:110px;font-size:13px;font-weight:700;color:#e2e8f0">{row["basket"]}</span>
             <div style="flex:1;background:#0f172a;border-radius:2px;height:14px;position:relative;overflow:hidden">
                 <div style="position:absolute;{bar_dir}:0;top:0;bottom:0;width:{bar_w}%;background:{bar_color};opacity:0.7;border-radius:2px"></div>
             </div>
@@ -89,7 +89,7 @@ def render_momentum(stock_df: pd.DataFrame, b_stats: pd.DataFrame, z_label: str)
 
     st.html(f"""
     <div style="background:#080f1a;border:1px solid #1e293b;border-radius:8px;padding:20px">
-        <div style="font-size:10px;font-weight:700;color:#f59e0b;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">Basket z-score ({mode})</div>
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">Basket z-score ({mode})</div>
         {basket_rows}
     </div>
     """)

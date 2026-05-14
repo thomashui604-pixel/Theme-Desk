@@ -79,7 +79,7 @@ def _render_regime_badge(regime: dict) -> str:
     return f"""
     <div style="display:inline-flex;align-items:center;gap:8px;background:#080f1a;border:1px solid rgba({_rgb_from_hex(regime['color'])},0.35);border-radius:6px;padding:6px 12px">
         <span style="width:6px;height:6px;border-radius:50%;background:{regime['color']};box-shadow:0 0 6px {regime['color']}"></span>
-        <span style="font-size:11px;font-weight:700;color:{regime['color']};letter-spacing:0.08em">{regime['label']}</span>
+        <span style="font-size:13px;font-weight:700;color:{regime['color']};letter-spacing:0.08em">{regime['label']}</span>
         <span style="font-size:9px;color:#475569;font-family:'IBM Plex Mono',monospace">{regime['detail']}</span>
     </div>
     """
@@ -97,10 +97,10 @@ def main():
     with col_title:
         st.markdown("""
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
-            <div style="width:36px;height:36px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000">⬡</div>
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#000">⬡</div>
             <div>
-                <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#e2e8f0">THEME DESK</div>
-                <div style="font-size:10px;color:#475569;letter-spacing:0.1em;text-transform:uppercase">Tech Basket Monitor · Live via yfinance</div>
+                <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#e2e8f0">THEME DESK</div>
+                <div style="font-size:12px;color:#475569;letter-spacing:0.1em;text-transform:uppercase">Tech Basket Monitor · Live via yfinance</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
