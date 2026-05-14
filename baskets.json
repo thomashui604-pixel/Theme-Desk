@@ -83,18 +83,18 @@
       "RBRK"
     ]
   },
-  "Crypto": {
+  "Neo Clouds": {
     "color": "#3b82f6",
     "tickers": [
-      "COIN",
       "MARA",
       "HUT",
-      "BITF",
-      "SOFI",
+      "KEEL",
+      "IREN",
       "RIOT",
       "CIFR",
       "CRCL",
-      "WULF"
+      "WULF",
+      "NBIS"
     ]
   }
 }
