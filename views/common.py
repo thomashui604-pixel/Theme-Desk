@@ -66,18 +66,27 @@ hr { border-color: #1e293b !important; }
 footer { visibility: hidden; }
 header { visibility: hidden; }
 
-/* Mobile / narrow viewport — collapse multi-column layouts to single column */
-@media (max-width: 800px) {
+/* Responsive: gracefully reflow multi-column layouts as viewport shrinks.
+   Below 1200px, columns wrap with a 240px minimum per child — so 5-wide
+   becomes 3-up, then 2-up, before collapsing to a single column on phone. */
+@media (max-width: 1200px) {
     [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
+        row-gap: 8px;
     }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        flex: 1 1 240px !important;
+        min-width: 240px !important;
+    }
+}
+@media (max-width: 600px) {
     [data-testid="stHorizontalBlock"] > [data-testid="column"] {
         flex: 1 1 100% !important;
         min-width: 100% !important;
         margin-bottom: 8px;
     }
     .block-container { padding: 0.75rem !important; }
-    .stTabs [data-baseweb="tab"] { padding: 10px 12px; font-size:13px; }
+    .stTabs [data-baseweb="tab"] { padding: 10px 12px; font-size: 13px; }
 }
 </style>
 """
