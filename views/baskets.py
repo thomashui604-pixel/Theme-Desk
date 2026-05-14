@@ -354,58 +354,80 @@ def _ticker_dialog(ticker: str, basket_name: str, prices_df: pd.DataFrame):
         unsafe_allow_html=True,
     )
 
-    # Raw candlestick — fetched on demand for the single ticker.
+    # Raw candlestick + z-score indicator as a single shared-x-axis figure.
     from data import fetch_ohlc
-    ohlc = fetch_ohlc(ticker, period="1y")
-    price_fig = go.Figure()
-    if not ohlc.empty and {"Open", "High", "Low", "Close"}.issubset(ohlc.columns):
-        price_fig.add_trace(go.Candlestick(
-            x=ohlc.index,
-            open=ohlc["Open"], high=ohlc["High"],
-            low=ohlc["Low"], close=ohlc["Close"],
-            increasing_line_color="#10b981", increasing_fillcolor="#10b981",
-            decreasing_line_color="#ef4444", decreasing_fillcolor="#ef4444",
-            line=dict(width=1),
-            whiskerwidth=0.3,
-            name=ticker,
-        ))
-    else:
-        # Fallback to the close series we already have.
-        price_fig.add_trace(go.Scatter(
-            x=series.index, y=series.values, mode="lines",
-            line=dict(color="#f59e0b", width=1.6),
-            hovertemplate="%{x|%b %d, %Y}<br>$%{y:.2f}<extra></extra>",
-        ))
-    price_fig.update_layout(
-        **{**PLOTLY_LAYOUT,
-           "height": 260,
-           "margin": dict(l=40, r=20, t=10, b=30),
-           "showlegend": False,
-           "xaxis": {**PLOTLY_LAYOUT["xaxis"], "rangeslider": dict(visible=False)},
-           "yaxis": {**PLOTLY_LAYOUT["yaxis"],
-                     "title": dict(text="Price ($)", font=dict(color="#475569", size=10))}},
-    )
-    st.plotly_chart(price_fig, use_container_width=True, config={"displayModeBar": False})
+    from plotly.subplots import make_subplots
+    from analytics import zscore_series as _zs
 
-    # Z-scores over time (5d + 20d) using the active z-window from session.
+    ohlc = fetch_ohlc(ticker, period="1y")
     full = prices_df[ticker].dropna()
     z_window = st.session_state.get("z_window", 252)
-    z5 = zscore_series(full, 5, z_window).dropna().tail(252)
-    z20 = zscore_series(full, 20, z_window).dropna().tail(252)
-    z_fig = go.Figure()
-    z_fig.add_trace(go.Scatter(x=z5.index, y=z5.values, mode="lines",
-                                name="5d z", line=dict(color="#06b6d4", width=1.2)))
-    z_fig.add_trace(go.Scatter(x=z20.index, y=z20.values, mode="lines",
-                                name="20d z", line=dict(color="#a855f7", width=1.2)))
-    z_fig.add_hline(y=0, line=dict(color="#334155", dash="dot", width=1))
-    z_fig.update_layout(
-        **{**PLOTLY_LAYOUT,
-           "height": 200,
-           "margin": dict(l=40, r=20, t=10, b=30),
-           "yaxis": {**PLOTLY_LAYOUT["yaxis"],
-                     "title": dict(text="Z-score (σ)", font=dict(color="#475569", size=9))}},
+    z5 = _zs(full, 5, z_window).dropna().tail(252)
+    z20 = _zs(full, 20, z_window).dropna().tail(252)
+
+    fig = make_subplots(
+        rows=2, cols=1,
+        shared_xaxes=True,
+        vertical_spacing=0.04,
+        row_heights=[0.62, 0.38],
     )
-    st.plotly_chart(z_fig, use_container_width=True, config={"displayModeBar": False})
+
+    if not ohlc.empty and {"Open", "High", "Low", "Close"}.issubset(ohlc.columns):
+        fig.add_trace(
+            go.Candlestick(
+                x=ohlc.index,
+                open=ohlc["Open"], high=ohlc["High"],
+                low=ohlc["Low"], close=ohlc["Close"],
+                increasing_line_color="#10b981", increasing_fillcolor="#10b981",
+                decreasing_line_color="#ef4444", decreasing_fillcolor="#ef4444",
+                line=dict(width=1),
+                whiskerwidth=0.3,
+                name=ticker, showlegend=False,
+            ),
+            row=1, col=1,
+        )
+    else:
+        fig.add_trace(
+            go.Scatter(
+                x=series.index, y=series.values, mode="lines",
+                line=dict(color="#f59e0b", width=1.6),
+                hovertemplate="%{x|%b %d, %Y}<br>$%{y:.2f}<extra></extra>",
+                showlegend=False,
+            ),
+            row=1, col=1,
+        )
+
+    fig.add_trace(
+        go.Scatter(x=z5.index, y=z5.values, mode="lines",
+                   name="5d z", line=dict(color="#06b6d4", width=1.2)),
+        row=2, col=1,
+    )
+    fig.add_trace(
+        go.Scatter(x=z20.index, y=z20.values, mode="lines",
+                   name="20d z", line=dict(color="#a855f7", width=1.2)),
+        row=2, col=1,
+    )
+    fig.add_hline(y=0, line=dict(color="#334155", dash="dot", width=1),
+                  row=2, col=1)
+
+    fig.update_layout(
+        **{**PLOTLY_LAYOUT,
+           "height": 480,
+           "margin": dict(l=50, r=20, t=10, b=30),
+           "showlegend": True,
+           # Horizontal legend at top — doesn't push plot width.
+           "legend": dict(orientation="h", yanchor="bottom", y=1.0,
+                          xanchor="right", x=1.0,
+                          bgcolor="rgba(0,0,0,0)", bordercolor="rgba(0,0,0,0)",
+                          font=dict(size=11, color="#94a3b8")),
+           "xaxis":  dict(**{**PLOTLY_LAYOUT["xaxis"], "rangeslider": dict(visible=False)}),
+           "xaxis2": dict(**PLOTLY_LAYOUT["xaxis"]),
+           "yaxis":  dict(**PLOTLY_LAYOUT["yaxis"],
+                          title=dict(text="Price ($)", font=dict(color="#475569", size=10))),
+           "yaxis2": dict(**PLOTLY_LAYOUT["yaxis"],
+                          title=dict(text="Z-score (σ)", font=dict(color="#475569", size=10)))},
+    )
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 def _render_ticker_drilldown(basket_name, cfg, members_df, prices_df, rgb):
