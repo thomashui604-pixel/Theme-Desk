@@ -9,22 +9,6 @@
       "ORCL"
     ]
   },
-  "Semis": {
-    "color": "#f59e0b",
-    "tickers": [
-      "NVDA",
-      "AMD",
-      "AVGO",
-      "QCOM",
-      "AMAT",
-      "LRCX",
-      "ASML",
-      "INTC",
-      "MU",
-      "TSM",
-      "ALAB"
-    ]
-  },
   "SaaS": {
     "color": "#8b5cf6",
     "tickers": [
@@ -95,6 +79,18 @@
       "CRCL",
       "WULF",
       "NBIS"
+    ]
+  },
+  "Semis - Compute GPU/CPU/ASICs": {
+    "color": "#f59e0b",
+    "tickers": [
+      "NVDA",
+      "AMD",
+      "AVGO",
+      "MRVL",
+      "QCOM",
+      "ARM",
+      "INTC"
     ]
   }
 }
