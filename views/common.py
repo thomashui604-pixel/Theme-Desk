@@ -62,10 +62,6 @@ hr { border-color: #1e293b !important; }
     font-size:13px; color: #10b981; font-weight: 700;
 }
 
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
-header { visibility: hidden; }
-
 /* Responsive: gracefully reflow multi-column layouts as viewport shrinks.
    Below 1200px, columns wrap with a 240px minimum per child — so 5-wide
    becomes 3-up, then 2-up, before collapsing to a single column on phone. */
