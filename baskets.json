@@ -94,31 +94,31 @@
     ]
   },
 
-  "Semis - AI Compute": {
+  "Semis - Fabless Design & IP": {
     "color": "#f59e0b",
     "tickers": [
       "NVDA",
       "AMD",
-      "ARM",
       "QCOM",
-      "INTC"
+      "ARM",
+      "SNPS",
+      "CDNS"
     ]
   },
 
-  "Semis - Foundry & Manufacturing": {
+  "Semis - IDM & Foundry": {
     "color": "#3b82f6",
     "tickers": [
       "TSM",
+      "INTC",
       "GFS",
       "UMC",
       "TSEM",
-      "STM",
-      "INTC",
-      "AMKR"
+      "STM"
     ]
   },
 
-  "Semis - EDA & Wafer Fab Equipment": {
+  "Semis - WFE & Back-end": {
     "color": "#2563eb",
     "tickers": [
       "ASML",
@@ -128,12 +128,11 @@
       "TER",
       "MKSI",
       "AEIS",
-      "SNPS",
-      "CDNS"
+      "AMKR"
     ]
   },
 
-  "Semis - Analog, Power & Industrial": {
+  "Semis - Analog, Power & MCU": {
     "color": "#14b8a6",
     "tickers": [
       "TXN",
