@@ -22,30 +22,25 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
     <div class="info-box">
         <strong style="color:#f59e0b">σ</strong>&nbsp;
         Axes show <strong style="color:#94a3b8">z-scores</strong> — each basket's return divided by its own {z_label.split("(")[0].strip()} rolling std dev.
-        Trail head = today; tail = N days ago. Direction matters more than location.
+        Each basket shows where it stood <strong style="color:#94a3b8">20 trading days ago</strong> (faint dot) connected to <strong style="color:#94a3b8">today</strong> (bright dot).
+        Direction matters more than location.
     </div>
     """, unsafe_allow_html=True)
 
-    ctrl_q, ctrl_slider = st.columns([3, 2])
-    with ctrl_slider:
-        trail_len = st.slider("Trail length (days)", min_value=5, max_value=30,
-                              value=10, step=1, key="rotation_trail_len")
-
-    with ctrl_q:
-        q1, q2, q3, q4 = st.columns(4)
-        quadrants = [
-            ("LAGGING · DECEL", "5d z < 0, 20d z < 0", "#ef4444"),
-            ("LAGGING · ACCEL", "5d z > 0, 20d z < 0", "#f59e0b"),
-            ("LEADING · DECEL", "5d z < 0, 20d z > 0", "#8b5cf6"),
-            ("LEADING · ACCEL", "5d z > 0, 20d z > 0", "#10b981"),
-        ]
-        for col, (q, desc, color) in zip([q1, q2, q3, q4], quadrants):
-            col.markdown(f"""
-            <div style="background:#080f1a;border:1px solid #1e293b;border-radius:6px;padding:6px 8px;font-size:9px">
-                <span style="color:{color};font-weight:700">{q}</span><br>
-                <span style="color:#475569">{desc}</span>
-            </div>
-            """, unsafe_allow_html=True)
+    q1, q2, q3, q4 = st.columns(4)
+    quadrants = [
+        ("LAGGING · DECEL", "5d z < 0, 20d z < 0", "#ef4444"),
+        ("LAGGING · ACCEL", "5d z > 0, 20d z < 0", "#f59e0b"),
+        ("LEADING · DECEL", "5d z < 0, 20d z > 0", "#8b5cf6"),
+        ("LEADING · ACCEL", "5d z > 0, 20d z > 0", "#10b981"),
+    ]
+    for col, (q, desc, color) in zip([q1, q2, q3, q4], quadrants):
+        col.markdown(f"""
+        <div style="background:#080f1a;border:1px solid #1e293b;border-radius:6px;padding:6px 8px;font-size:9px">
+            <span style="color:{color};font-weight:700">{q}</span><br>
+            <span style="color:#475569">{desc}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<div style='height:16px'/>", unsafe_allow_html=True)
 
@@ -53,7 +48,8 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
         st.info("No basket data available.")
         return
 
-    trails = rotation_trails(prices_df, baskets, z_window, trail_len=trail_len)
+    TRAIL_DAYS = 20
+    trails = rotation_trails(prices_df, baskets, z_window, trail_len=TRAIL_DAYS + 1)
 
     fig = go.Figure()
     for x0, x1, y0, y1, col in [
@@ -85,52 +81,51 @@ def render_rotation(b_stats: pd.DataFrame, prices_df: pd.DataFrame,
         if name not in trails or trails[name].empty:
             continue
         path = trails[name].dropna(subset=["z_short", "z_long"])
-        if path.empty:
+        if len(path) < 2:
             continue
 
-        xs = path["z_short"].tolist()
-        ys = path["z_long"].tolist()
-        n = len(xs)
+        # Keep only the endpoints: 20 days ago and today.
+        endpoints = path.iloc[[0, -1]]
+        xs = endpoints["z_short"].tolist()
+        ys = endpoints["z_long"].tolist()
 
-        # Trail line (faded)
-        if n >= 2:
-            fig.add_trace(go.Scatter(
-                x=xs, y=ys, mode="lines",
-                line=dict(color=f"rgba({rgb},0.45)", width=1.5),
-                hoverinfo="skip",
-                showlegend=False,
-            ))
-
-        # Trail markers with fading opacity from old → new
-        marker_colors = [
-            f"rgba({rgb},{0.15 + 0.85 * (i / max(n - 1, 1))})"
-            for i in range(n)
-        ]
-        sizes = [4 + 8 * (i / max(n - 1, 1)) for i in range(n)]
-        dates = [d.strftime("%b %d") for d in path["date"]]
+        # Connecting line — past → present
         fig.add_trace(go.Scatter(
-            x=xs, y=ys, mode="markers",
-            marker=dict(size=sizes, color=marker_colors,
-                        line=dict(color=color, width=0.5)),
-            customdata=dates,
+            x=xs, y=ys, mode="lines",
+            line=dict(color=f"rgba({rgb},0.5)", width=1.5),
+            hoverinfo="skip",
+            showlegend=False,
+        ))
+
+        # Past marker (faint, small)
+        past_date = endpoints["date"].iloc[0].strftime("%b %d")
+        fig.add_trace(go.Scatter(
+            x=[xs[0]], y=[ys[0]], mode="markers",
+            marker=dict(size=7, color=f"rgba({rgb},0.35)",
+                        line=dict(color=color, width=1)),
             hovertemplate=(
                 f"<b style='color:{color}'>{name}</b><br>"
-                "%{customdata}<br>"
+                f"{past_date}<br>"
                 "5d z: %{x:.2f}σ<br>"
                 "20d z: %{y:.2f}σ<extra></extra>"
             ),
             showlegend=False,
         ))
 
-        # Terminal label
+        # Current marker (bright, larger) + label
         label = name[:7] + "…" if len(name) > 7 else name
         fig.add_trace(go.Scatter(
             x=[xs[-1]], y=[ys[-1]], mode="markers+text",
             text=[label], textposition="top center",
-            textfont=dict(color=color, size=10, family="IBM Plex Mono"),
+            textfont=dict(color=color, size=12, family="IBM Plex Mono"),
             marker=dict(size=14, color=color,
                         line=dict(color="#080f1a", width=2)),
-            hoverinfo="skip",
+            hovertemplate=(
+                f"<b style='color:{color}'>{name}</b><br>"
+                "today<br>"
+                "5d z: %{x:.2f}σ<br>"
+                "20d z: %{y:.2f}σ<extra></extra>"
+            ),
             showlegend=False,
         ))
 
