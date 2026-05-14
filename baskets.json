@@ -120,5 +120,17 @@
       "CDNS",
       "ARM"
     ]
+  },
+  "Semis - Analog/Power/Industrial": {
+    "color": "#3b82f6",
+    "tickers": [
+      "TXN",
+      "MPWR",
+      "MCHP",
+      "NXPI",
+      "ON",
+      "SITM",
+      "SMTC"
+    ]
   }
 }
