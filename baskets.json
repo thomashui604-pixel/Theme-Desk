@@ -92,5 +92,16 @@
       "ARM",
       "INTC"
     ]
+  },
+  "Semis - Foundry": {
+    "color": "#3b82f6",
+    "tickers": [
+      "TSM",
+      "GFS",
+      "UMC",
+      "TSEM",
+      "STM",
+      "INTC"
+    ]
   }
 }
