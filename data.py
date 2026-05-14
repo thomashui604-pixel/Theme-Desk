@@ -42,6 +42,28 @@ def fetch_prices(tickers: tuple, period: str = FETCH_PERIOD,
     return close
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_ohlc(ticker: str, period: str = "1y") -> pd.DataFrame:
+    """OHLC for a single ticker — used by the drill-down modal for candles."""
+    if not ticker:
+        return pd.DataFrame()
+    try:
+        df = yf.download(
+            ticker, period=period, interval="1d",
+            auto_adjust=True, progress=False,
+            timeout=15,
+        )
+    except Exception:
+        return pd.DataFrame()
+    if df.empty:
+        return pd.DataFrame()
+    # yfinance may return columns as a MultiIndex when threads=True; flatten.
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    keep = [c for c in ("Open", "High", "Low", "Close") if c in df.columns]
+    return df[keep].dropna(how="all")
+
+
 def missing_tickers(requested: tuple, prices_df: pd.DataFrame) -> list:
     """Tickers that were requested but absent or all-NaN in the returned panel."""
     if prices_df.empty:
